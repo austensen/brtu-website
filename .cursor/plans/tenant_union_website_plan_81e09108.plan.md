@@ -196,16 +196,16 @@ Use this to split work into **reviewable chunks**. For each workstream, answer i
 
 Use statuses: `not started`, `planning`, `in progress`, `done`, `blocked`.
 
-- `WS-A` Foundation and repository layout — `not started`
-- `WS-B` Internationalization and URL strategy — `not started`
-- `WS-C` Sanity content model (schemas) — `not started`
+- `WS-A` Foundation and repository layout — `done`
+- `WS-B` Internationalization and URL strategy — `done`
+- `WS-C` Sanity content model (schemas) — `done`
 - `WS-D` Studio desk structure and editor guardrails — `not started`
 - `WS-E` Design system, global chrome, accessibility — `not started`
 - `WS-F` Marketing pages (Home, About, Contact) — `not started`
 - `WS-G` Blog/news — `not started`
 - `WS-H` Resources library — `not started`
 - `WS-I` Events — `not started`
-- `WS-J` Deploy, CI/CD, webhooks, operations — `not started`
+- `WS-J` Deploy, CI/CD, webhooks, operations — `done`
 - `WS-K` Editor handbook, training, launch QA — `not started`
 
 **Dependency sketch**
@@ -732,4 +732,144 @@ Next workstreams:
 - WS-B (i18n + URL routing)
 - WS-C (Sanity schemas)
 - WS-J (deploy/CI/env wiring)
+```
+
+## Workstream completion note (WS-B)
+
+### what shipped
+
+- Locale-prefixed routing skeleton for Astro web app with canonical English under `/en/...`.
+- No-locale request handling wired to English canonical route via Netlify redirects.
+- Shared locale constants/utilities added for reuse across workstreams.
+- Language switcher component added and currently constrained to published locales.
+
+### files touched
+
+- `apps/web/src/pages/index.astro`
+- `apps/web/src/pages/en/index.astro`
+- `apps/web/src/lib/i18n/locales.ts`
+- `apps/web/src/components/LanguageSwitcher.astro`
+- `netlify.toml`
+
+### deviations from plan
+
+- Browser language detection is scaffolded but not fully content-aware yet; full behavior depends on live locale availability from CMS content.
+- Missing-translation redirect for localized post/event detail pages is pending final dynamic route implementation (planned in downstream page workstreams).
+
+### new constraints
+
+- Routing behavior now assumes locale-prefixed canonical URLs from day one.
+- Downstream page templates should consume shared locale helpers rather than introducing new locale constants.
+
+### follow-up dependencies
+
+- `WS-D`: editor workflows should make translation relationships easy to maintain.
+- `WS-F/G/H/I`: implement localized document route resolution and same-document English fallback behavior at page level.
+
+## Workstream completion note (WS-C)
+
+### what shipped
+
+- MVP Sanity schema set implemented: `siteSettings`, `page`, `post`, `resourceCategory`, `resource`, `event`.
+- Reusable schema objects implemented: rich text + contact Netlify form copy object.
+- Document-level locale linkage (`locale`, `translationOf`) added to support i18n routing and fallback.
+- Validation coverage added for key editorial guardrails (required fields, event end-after-start, resource file required, contact form config required on Contact pages).
+
+### files touched
+
+- `apps/studio/schemas/index.ts`
+- `apps/studio/schemas/documents/siteSettings.ts`
+- `apps/studio/schemas/documents/page.ts`
+- `apps/studio/schemas/documents/post.ts`
+- `apps/studio/schemas/documents/resourceCategory.ts`
+- `apps/studio/schemas/documents/resource.ts`
+- `apps/studio/schemas/documents/event.ts`
+- `apps/studio/schemas/objects/richText.ts`
+- `apps/studio/schemas/objects/contactFormConfig.ts`
+- `apps/studio/sanity.config.ts`
+
+### deviations from plan
+
+- Translation linkage is implemented as a pragmatic `translationOf` reference to English source documents; no additional translation metadata plugin/workflow yet.
+
+### new constraints
+
+- All translatable document types now rely on locale + English linkage conventions that downstream queries should preserve.
+- Contact page rendering in `WS-F` should read labels/messages from `contactFormConfig` instead of hardcoded UI strings.
+
+### follow-up dependencies
+
+- `WS-D`: add desk structure, templates, and publish checklist UX on top of current schemas.
+- `WS-F/G/H/I`: implement queries and templates against the shipped schema contract.
+
+## Workstream completion note (WS-J)
+
+### what shipped
+
+- Deployment/ops documentation captured for Netlify + Sanity workflow.
+- Studio deploy scripts standardized for both root and app-level command contexts.
+- Sanity CLI config updated with fixed `studioHost` to reduce repeat deploy prompts.
+- Sanity CORS configured for local Astro dev origin and production Netlify domain.
+
+### files touched
+
+- `docs/ws-j-deploy-ci-env.md`
+- `README.md`
+- `package.json`
+- `apps/studio/package.json`
+- `apps/studio/sanity.cli.ts`
+- `netlify.toml`
+
+### deviations from plan
+
+- Webhook wiring remains documented and ready, but final trigger/filter tuning should be validated against real content publish flow after WS-F/WS-G/WS-H/WS-I pages are wired.
+
+### new constraints
+
+- Deployment commands should use script wrappers (`npm run deploy:studio`) for consistency across contributors.
+- Env resolution now supports both `SANITY_*` and `SANITY_STUDIO_*` naming patterns to reduce local startup failures.
+
+### follow-up dependencies
+
+- `WS-K`: include final webhook verification screenshots/steps in launch QA checklist.
+- `WS-D/E/F`: ensure Studio/editor docs and frontend behavior match the deployed routing/schema/env contracts.
+
+## Next-agent context packet (post WS-J)
+
+Use this packet at the top of the next session:
+
+```md
+Workstream handoff: WS-B, WS-C, and WS-J implemented.
+
+Source of truth:
+
+- .cursor/plans/tenant_union_website_plan_81e09108.plan.md
+
+Completed:
+
+- WS-A foundation/tooling baseline
+- WS-B i18n routing skeleton (`/en/...` canonical, locale helpers, switcher stub)
+- WS-C Sanity MVP schemas + locale linkage + validations
+- WS-J deploy/env docs + scripts + CORS baseline
+
+Important constraints to preserve:
+
+- Locale-prefixed canonical URLs remain required
+- Shared locale constants should be reused (do not duplicate locale lists)
+- Sanity translation linkage uses `locale` + `translationOf` conventions
+- Contact page form copy must come from schema fields
+- Deployment/scripts should keep root and app command parity
+
+Recommended next workstreams:
+
+- WS-D (Studio desk structure + editor guardrails)
+- WS-E (design system + accessibility baseline)
+- Then WS-F/G/H/I in parallel against the now-stable routing + schema contracts
+
+Read first:
+
+- .cursor/plans/tenant_union_website_plan_81e09108.plan.md (status tracker + WS-B/C/J completion notes)
+- docs/ws-j-deploy-ci-env.md
+- apps/studio/schemas/index.ts
+- apps/web/src/lib/i18n/locales.ts
 ```
