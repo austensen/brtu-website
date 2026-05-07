@@ -297,14 +297,16 @@ Use [.cursor/plans/tenant_union_website_plan_81e09108.plan.md] as the source of 
 Respect all locked decisions and constraints.
 
 Goal:
+
 - [state concrete goal]
 
 Return:
-1) Proposed implementation approach
-2) Exact files/folders to create or modify
-3) Data model/API contracts (if relevant)
-4) Acceptance criteria and test checklist
-5) Risks, assumptions, and anything that needs user confirmation
+
+1. Proposed implementation approach
+2. Exact files/folders to create or modify
+3. Data model/API contracts (if relevant)
+4. Acceptance criteria and test checklist
+5. Risks, assumptions, and anything that needs user confirmation
 
 Do not implement code yet.
 ```
@@ -315,11 +317,13 @@ Do not implement code yet.
 Implement accepted plan for [WS-ID: title].
 
 Context:
+
 - Master plan: [.cursor/plans/tenant_union_website_plan_81e09108.plan.md]
 - Accepted workstream plan: [path-to-workstream-plan]
 - Locked decisions: [paste short bullets]
 
 Requirements:
+
 - Keep changes limited to this workstream scope
 - Run relevant checks/tests
 - Summarize files changed and any follow-up tasks
@@ -366,9 +370,11 @@ Create the **accepted WS-A implementation plan** (no coding yet) for repository 
 You are planning WS-A (Foundation and repository layout) for this project.
 
 Source of truth:
+
 - .cursor/plans/tenant_union_website_plan_81e09108.plan.md
 
 Locked decisions to respect:
+
 - Monorepo: apps/web + apps/studio
 - Package manager: npm
 - Frontend framework: Astro
@@ -379,16 +385,17 @@ Locked decisions to respect:
 - Audience/editor constraints: one non-technical editor, multilingual roadmap, near-zero budget
 
 Your task:
-1) Produce a complete WS-A implementation plan (no code changes yet)
-2) Specify exact folders/files to create or modify
-3) Define scripts/tooling conventions (dev/build/lint/typecheck/format)
-4) Define env var contract for local + deployment
-5) Reflect finalized license details and file placement:
+
+1. Produce a complete WS-A implementation plan (no code changes yet)
+2. Specify exact folders/files to create or modify
+3. Define scripts/tooling conventions (dev/build/lint/typecheck/format)
+4. Define env var contract for local + deployment
+5. Reflect finalized license details and file placement:
    - `LICENSE` for code (`PolyForm-Noncommercial-1.0.0`)
    - `LICENSE-CONTENT` for content/media/docs (`CC-BY-NC-SA-4.0`)
-6) Provide acceptance criteria + verification commands
-7) List any unresolved questions that block implementation
-8) Produce context-hygiene artifacts for downstream workstreams:
+6. Provide acceptance criteria + verification commands
+7. List any unresolved questions that block implementation
+8. Produce context-hygiene artifacts for downstream workstreams:
    - Add/update a `Workstream completion note` section in `.cursor/plans/tenant_union_website_plan_81e09108.plan.md` for `WS-A` containing:
      - what shipped (planned scope),
      - files/folders expected to be touched,
@@ -398,6 +405,7 @@ Your task:
    - Add a short `Next-agent context packet` block that can be pasted into the next session.
 
 Output format:
+
 - Scope
 - Proposed architecture/layout
 - File/folder plan
@@ -611,13 +619,13 @@ This requirement is mandatory to preserve master-plan usefulness across future s
 
 ## Risks and mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Multilingual scope creep | EN-only at launch; add ES/AR/ZH+ incrementally; partial parity + fallback rules documented |
-| RTL (Arabic) layout | Plan typography and layout for `dir="rtl"` when `ar` locale is enabled; test nav and forms |
-| One-month soft deadline | Cut Phase 2 items aggressively; ship MVP with strong core journeys |
-| Non-technical editor errors | Required fields, previews, checklist actions, training doc |
-| Free-tier limits | Monitor assets/API usage; compress images; keep builds lean |
+| Risk                        | Mitigation                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| Multilingual scope creep    | EN-only at launch; add ES/AR/ZH+ incrementally; partial parity + fallback rules documented |
+| RTL (Arabic) layout         | Plan typography and layout for `dir="rtl"` when `ar` locale is enabled; test nav and forms |
+| One-month soft deadline     | Cut Phase 2 items aggressively; ship MVP with strong core journeys                         |
+| Non-technical editor errors | Required fields, previews, checklist actions, training doc                                 |
+| Free-tier limits            | Monitor assets/API usage; compress images; keep builds lean                                |
 
 ## Deliverables checklist
 
@@ -694,9 +702,11 @@ Use this packet at the top of the next session:
 Workstream handoff: WS-A complete (planning artifact only; no code executed yet).
 
 Source of truth:
+
 - .cursor/plans/tenant_union_website_plan_81e09108.plan.md
 
 Locked decisions (do not reopen):
+
 - Monorepo: apps/web + apps/studio
 - Package manager: npm
 - Frontend: Astro
@@ -708,14 +718,17 @@ Locked decisions (do not reopen):
   - LICENSE-CONTENT => CC-BY-NC-SA-4.0 (content/media/docs)
 
 WS-A planned outputs:
+
 - Root workspace/tooling files, app scaffolds, script matrix, env contract, license files.
 - Verification commands for dev/build/lint/typecheck/format.
 
 Recommended next reads:
+
 - .cursor/plans/tenant_union_website_plan_81e09108.plan.md (WS-A note + WS-B/WS-C sections)
 - .cursor/plans/discovery-questions.md
 
 Next workstreams:
+
 - WS-B (i18n + URL routing)
 - WS-C (Sanity schemas)
 - WS-J (deploy/CI/env wiring)
