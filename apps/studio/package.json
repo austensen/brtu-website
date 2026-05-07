@@ -1,0 +1,14 @@
+{
+  "name": "@brtu/studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "sanity": "^3.0.0"
+  }
+}
+

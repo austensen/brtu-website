@@ -1,0 +1,31 @@
+{
+  "name": "brtu-website",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:web": "npm -w apps/web run dev",
+    "dev:studio": "npm -w apps/studio run dev",
+    "dev": "npm run dev:web",
+    "build:web": "npm -w apps/web run build",
+    "build:studio": "npm -w apps/studio run build",
+    "build": "npm run build:web && npm run build:studio",
+    "lint": "eslint .",
+    "typecheck": "npm -w apps/web run typecheck && npm -w apps/studio run typecheck",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
