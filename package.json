@@ -14,6 +14,7 @@
     "build:web": "npm -w apps/web run build",
     "build:studio": "npm -w apps/studio run build",
     "build": "npm run build:web && npm run build:studio",
+    "deploy:studio": "npm -w apps/studio run deploy",
     "lint": "eslint .",
     "typecheck": "npm -w apps/web run typecheck && npm -w apps/studio run typecheck",
     "format": "prettier . --write",

@@ -44,7 +44,13 @@ Local development uses a single root `.env` file (never committed). Deployment/C
 - `npm run dev:web`: run Astro site
 - `npm run dev:studio`: run Sanity Studio
 - `npm run build`: build both apps
+- `npm run deploy:studio`: deploy Sanity Studio
 - `npm run lint`: lint repo
 - `npm run typecheck`: typecheck both apps
 - `npm run format`: format repo
 - `npm run format:check`: verify formatting
+
+## Deployment notes
+
+- WS-A foundation contract: `docs/ws-a-foundation-contract.md`
+- WS-J deploy/CI/env wiring: `docs/ws-j-deploy-ci-env.md`

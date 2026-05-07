@@ -2,6 +2,9 @@
   command = "npm run build:web"
   publish = "apps/web/dist"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 [[redirects]]
   from = "/en/*"
   to = "/en/:splat"
