@@ -22,6 +22,23 @@ This repository is source-available and non-commercial.
    - `npm run dev:web`
    - `npm run dev:studio`
 
+## Environment variables
+
+Local development uses a single root `.env` file (never committed). Deployment/CI uses platform env vars.
+
+- **Shared (root `.env`)**
+  - `SANITY_PROJECT_ID`
+  - `SANITY_DATASET`
+  - `SANITY_API_VERSION` (optional)
+- **Web (`apps/web`)**
+  - `PUBLIC_SANITY_PROJECT_ID`
+  - `PUBLIC_SANITY_DATASET`
+  - `PUBLIC_SANITY_API_VERSION` (optional)
+- **Studio (`apps/studio`)**
+  - `SANITY_PROJECT_ID`
+  - `SANITY_DATASET`
+  - `SANITY_API_VERSION` (optional)
+
 ## Scripts
 
 - `npm run dev:web`: run Astro site

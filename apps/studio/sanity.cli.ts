@@ -4,4 +4,3 @@ export default {
     dataset: process.env.SANITY_DATASET || "",
   },
 };
-
