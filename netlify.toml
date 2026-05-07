@@ -2,3 +2,29 @@
   command = "npm run build:web"
   publish = "apps/web/dist"
 
+[[redirects]]
+  from = "/en/*"
+  to = "/en/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/es/*"
+  to = "/es/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/ar/*"
+  to = "/ar/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/zh/*"
+  to = "/zh/:splat"
+  status = 200
+
+# WS-B locked: No-locale URLs redirect to English canonical routes.
+[[redirects]]
+  from = "/*"
+  to = "/en/:splat"
+  status = 301
+

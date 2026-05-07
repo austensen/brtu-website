@@ -1,4 +1,6 @@
 ---
+// Canonical routes are locale-prefixed (e.g. /en/...)
+// This top-level page exists only to support static hosting fallback.
 const title = "BRTU";
 ---
 
@@ -8,11 +10,12 @@ const title = "BRTU";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <meta http-equiv="refresh" content="0; url=/en/" />
   </head>
   <body>
     <main style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; padding: 2rem;">
       <h1>{title}</h1>
-      <p>Repo foundation is set up. Next workstreams will wire CMS content + i18n.</p>
+      <p>Redirecting to English…</p>
     </main>
   </body>
 </html>
