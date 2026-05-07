@@ -8,8 +8,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev:web": "npm -w apps/web run dev",
-    "dev:studio": "npm -w apps/studio run dev",
+    "dev:web": "npm -w apps/web run dev --",
+    "dev:studio": "npm -w apps/studio run dev --",
     "dev": "npm run dev:web",
     "build:web": "npm -w apps/web run build",
     "build:studio": "npm -w apps/studio run build",

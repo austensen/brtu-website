@@ -2,8 +2,21 @@ import { defineConfig } from "sanity";
 
 import { schemaTypes } from "./schemas";
 
-const projectId = process.env.SANITY_PROJECT_ID || "";
-const dataset = process.env.SANITY_DATASET || "";
+const projectId =
+  process.env.SANITY_PROJECT_ID ||
+  process.env.SANITY_STUDIO_PROJECT_ID ||
+  "";
+const dataset =
+  process.env.SANITY_DATASET ||
+  process.env.SANITY_STUDIO_DATASET ||
+  "";
+const apiVersion = process.env.SANITY_API_VERSION || "2024-01-01";
+
+if (!projectId || !dataset) {
+  throw new Error(
+    "Sanity Studio configuration error: missing SANITY_PROJECT_ID/SANITY_DATASET (or SANITY_STUDIO_PROJECT_ID/SANITY_STUDIO_DATASET).",
+  );
+}
 
 export default defineConfig({
   name: "default",
@@ -11,6 +24,7 @@ export default defineConfig({
 
   projectId,
   dataset,
+  apiVersion,
 
   schema: {
     types: schemaTypes,
