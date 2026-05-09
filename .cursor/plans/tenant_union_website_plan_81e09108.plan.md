@@ -199,8 +199,8 @@ Use statuses: `not started`, `planning`, `in progress`, `done`, `blocked`.
 - `WS-A` Foundation and repository layout — `done`
 - `WS-B` Internationalization and URL strategy — `done`
 - `WS-C` Sanity content model (schemas) — `done`
-- `WS-D` Studio desk structure and editor guardrails — `not started`
-- `WS-E` Design system, global chrome, accessibility — `not started`
+- `WS-D` Studio desk structure and editor guardrails — `done`
+- `WS-E` Design system, global chrome, accessibility — `done`
 - `WS-F` Marketing pages (Home, About, Contact) — `not started`
 - `WS-G` Blog/news — `not started`
 - `WS-H` Resources library — `not started`
@@ -799,8 +799,75 @@ Next workstreams:
 
 ### follow-up dependencies
 
-- `WS-D`: add desk structure, templates, and publish checklist UX on top of current schemas.
-- `WS-F/G/H/I`: implement queries and templates against the shipped schema contract.
+- `WS-D`: desk structure, checklist UX, and shared locale package are done (see **Workstream completion note (WS-D)**).
+- `WS-F/G/H/I`: implement queries and templates against the shipped schema contract (starter GROQ in `apps/web/src/lib/sanity/queries.ts`).
+
+## Workstream completion note (WS-D)
+
+### what shipped
+
+- Shared workspace package **`@brtu/locales`** (`packages/locales`): single source for `supportedLocales`, Studio locale list labels, `isRtlLocale`, and path/browser helpers; web and Studio schemas consume it (no duplicated locale lists).
+- **Desk structure** (`apps/studio/structure/index.ts`): grouped navigation — site settings, pages by type (Home / About / Contact), posts, resources, events, resource categories; ordering by locale where useful.
+- **Studio config** (`apps/studio/sanity.config.ts`): `structureTool` registered; **`document.actions`** appends a non-blocking **Editor checklist** dialog (`apps/studio/actions/editorChecklistAction.tsx`) with reminders by schema type.
+- **Field guardrails**: `description` text on `locale`, `translationOf`, and contact form fields (and parallel copy on other translatable types) to steer editors on translation linking.
+- **TypeScript**: Studio `tsconfig` uses `"jsx": "react-jsx"` for the checklist action component.
+
+### files touched (representative)
+
+- `package.json` (workspaces: `packages/*`)
+- `packages/locales/package.json`, `packages/locales/src/index.ts`
+- `apps/web/package.json`, `apps/studio/package.json` (dependency on `@brtu/locales`)
+- `apps/web/src/lib/i18n/locales.ts` (re-exports + `publishedLocales`)
+- `apps/studio/schemas/documents/*.ts` (locale lists via `localeOptionsForSanity()`)
+- `apps/studio/structure/index.ts`, `apps/studio/actions/editorChecklistAction.tsx`, `apps/studio/sanity.config.ts`, `apps/studio/tsconfig.json`
+
+### deviations from plan
+
+- **Vision / GROQ tool**: `@sanity/vision` was **not** added — current `@sanity/vision` major expects Sanity **4+**; this repo remains on **Sanity 3.99**. Use API playground or external GROQ runner if needed until a v3-compatible vision pin is chosen or Studio is upgraded.
+
+### new constraints
+
+- Any new translatable document type should use **`localeOptionsForSanity()`** from `@brtu/locales` for its locale field list.
+- Custom checklist copy should stay **non-blocking** unless product explicitly requires publish gates later.
+
+### follow-up dependencies
+
+- `WS-K`: optionally document the checklist + desk layout in the editor handbook.
+- `WS-F/G/H/I`: consume **`apps/web/src/lib/sanity/queries.ts`** (or extend it) when wiring pages.
+
+## Workstream completion note (WS-E)
+
+### what shipped
+
+- **Brand asset**: official logo at `apps/web/public/images/brtu-logo.png`; header wordmark uses the image with adjacent organization name (decorative `alt=""` where text repeats the name).
+- **Design tokens and global CSS** (`apps/web/src/styles/global.css`): logo-aligned palette (primary `#c82327`, charcoal text, white surfaces), focus-visible outlines, skip link, header/footer/nav, language switcher styles, `.btn` / `.card` / `.prose`, **`prefers-reduced-motion`** handling.
+- **Layout shell** (`apps/web/src/layouts/BaseLayout.astro`): `lang` + **`dir`** from `isRtlLocale(locale)`, skip link, single `<main>`, optional `description` meta; short **a11y baseline comment** in layout source.
+- **Chrome components**: `Header.astro` (logo, primary nav stub, language switcher), `Footer.astro` (minimal copyright line).
+- **`LanguageSwitcher.astro`**: class-based styling; `aria-label` on the list; no nested `<nav>` inside primary nav.
+- **Locale home** (`apps/web/src/pages/en/index.astro`): uses `BaseLayout`; retains sessionStorage stub from WS-B.
+- **GROQ handoff** (`apps/web/src/lib/sanity/queries.ts`): exported query strings aligned to current schemas, **`distinctPublishedLocales`**, and comments on syncing **`publishedLocales`** with real content.
+
+### files touched (representative)
+
+- `apps/web/public/images/brtu-logo.png`
+- `apps/web/src/styles/global.css`
+- `apps/web/src/layouts/BaseLayout.astro`
+- `apps/web/src/components/Header.astro`, `Footer.astro`, `LanguageSwitcher.astro`
+- `apps/web/src/pages/en/index.astro`
+- `apps/web/src/lib/sanity/queries.ts`
+
+### deviations from plan
+
+- None material; inline link/button demos on the home stub were kept minimal (card + copy only) to avoid placeholder controls.
+
+### new constraints
+
+- New public routes should **use `BaseLayout`** and avoid hardcoding Contact form strings (WS-F reads **`contactFormConfig`**).
+- Expand **`publishedLocales`** (or derive at build time via `distinctPublishedLocales`) when non-English content is published so the switcher matches WS-B.
+
+### follow-up dependencies
+
+- `WS-F/G/H/I`: wire Astro pages to Sanity using env vars from `docs/ws-j-deploy-ci-env.md` and queries in `queries.ts`; implement WS-B fallback redirects per content type where required.
 
 ## Workstream completion note (WS-J)
 
@@ -832,14 +899,14 @@ Next workstreams:
 ### follow-up dependencies
 
 - `WS-K`: include final webhook verification screenshots/steps in launch QA checklist.
-- `WS-D/E/F`: ensure Studio/editor docs and frontend behavior match the deployed routing/schema/env contracts.
+- `WS-F`: ensure Studio/editor docs and frontend behavior match the deployed routing/schema/env contracts (WS-D/E now align Studio + `BaseLayout`).
 
-## Next-agent context packet (post WS-J)
+## Next-agent context packet (post WS-D / WS-E)
 
 Use this packet at the top of the next session:
 
 ```md
-Workstream handoff: WS-B, WS-C, and WS-J implemented.
+Workstream handoff: WS-A through WS-E and WS-J implemented; WS-F–I are next (parallel).
 
 Source of truth:
 
@@ -848,28 +915,31 @@ Source of truth:
 Completed:
 
 - WS-A foundation/tooling baseline
-- WS-B i18n routing skeleton (`/en/...` canonical, locale helpers, switcher stub)
-- WS-C Sanity MVP schemas + locale linkage + validations
+- WS-B i18n routing skeleton (`/en/...` canonical, locale helpers, language switcher)
+- WS-C Sanity MVP schemas + locale + `translationOf` + validations
 - WS-J deploy/env docs + scripts + CORS baseline
+- WS-D Studio desk structure + non-blocking editor checklist action + shared `@brtu/locales` (no duplicated locale lists in schemas)
+- WS-E brand tokens + logo + `BaseLayout` (lang/dir, skip link, header/footer) + `global.css` a11y/motion baseline + `apps/web/src/lib/sanity/queries.ts` for F–I
 
 Important constraints to preserve:
 
 - Locale-prefixed canonical URLs remain required
-- Shared locale constants should be reused (do not duplicate locale lists)
-- Sanity translation linkage uses `locale` + `translationOf` conventions
-- Contact page form copy must come from schema fields
-- Deployment/scripts should keep root and app command parity
+- Locale lists: import from `@brtu/locales` (`localeOptionsForSanity()` in Studio; web via `apps/web/src/lib/i18n/locales.ts` and `publishedLocales`)
+- Sanity translation linkage: `locale` + `translationOf` (English source)
+- Contact page: all form copy from `contactFormConfig` (no hardcoded labels in UI)
+- Deployment/scripts: root ↔ app command parity (`docs/ws-j-deploy-ci-env.md`)
+- Studio: Sanity 3.x — Vision plugin not bundled (peer mismatch with current `@sanity/vision` 5.x)
 
 Recommended next workstreams:
 
-- WS-D (Studio desk structure + editor guardrails)
-- WS-E (design system + accessibility baseline)
-- Then WS-F/G/H/I in parallel against the now-stable routing + schema contracts
+- WS-F, WS-G, WS-H, WS-I in parallel: marketing pages, blog, resources, events — each uses `BaseLayout`, GROQ from `apps/web/src/lib/sanity/queries.ts`, and WS-B fallback rules for missing translations
 
 Read first:
 
-- .cursor/plans/tenant_union_website_plan_81e09108.plan.md (status tracker + WS-B/C/J completion notes)
-- docs/ws-j-deploy-ci-env.md
+- .cursor/plans/tenant_union_website_plan_81e09108.plan.md (status tracker + WS-D/E completion notes)
+- apps/web/src/layouts/BaseLayout.astro
+- apps/web/src/lib/sanity/queries.ts
+- apps/web/src/lib/i18n/locales.ts (`publishedLocales` strategy)
 - apps/studio/schemas/index.ts
-- apps/web/src/lib/i18n/locales.ts
+- docs/ws-j-deploy-ci-env.md
 ```
