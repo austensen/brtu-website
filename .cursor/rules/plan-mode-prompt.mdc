@@ -1,0 +1,10 @@
+---
+description: Plan mode and site planning — MVP anchor, master plan, infra drift (Type C) needs explicit user approval; full prompt in docs/cursor-plan-mode-prompt.md
+alwaysApply: true
+---
+
+# Plan mode and site change planning
+
+- For **Cursor Plan mode** or **plan-first** site work, use the full copy-paste template in [`docs/cursor-plan-mode-prompt.md`](docs/cursor-plan-mode-prompt.md).
+- **Source of truth** for scope and locked decisions: [`.cursor/plans/tenant_union_website_plan_81e09108.plan.md`](.cursor/plans/tenant_union_website_plan_81e09108.plan.md).
+- **Type C** (CMS/host/framework swap, monorepo/pm change, new backend, paid/undocumented services, CI/secrets conflicts with `docs/ws-j-deploy-ci-env.md`, or **Phase 2** scope without the user asking): put **“Explicit user approval required (infrastructure or scope expansion)”** at the **top** of the plan; do not treat those options as decided.
