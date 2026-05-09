@@ -75,13 +75,15 @@ body {
   border-radius: var(--radius);
   font-weight: 600;
   text-decoration: none;
-  transform: translateY(-120%);
+  transform: translateY(calc(-100% - var(--space-4)));
   transition: transform 0.15s ease;
+  pointer-events: none;
 }
 
 .skip-link:focus,
 .skip-link:focus-visible {
   transform: translateY(0);
+  pointer-events: auto;
 }
 
 .visually-hidden {
