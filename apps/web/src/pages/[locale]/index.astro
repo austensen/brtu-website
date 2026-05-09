@@ -8,13 +8,9 @@ import { pageByTypeAndLocale } from "../../lib/sanity/queries";
 import { richTextToHtml } from "../../lib/sanity/portableText";
 
 export async function getStaticPaths() {
-  const client = getSanityClient();
-  const withHome = await client.fetch<string[]>(
-    `array::unique(*[_type == "page" && pageType == "home"].locale)`,
-  );
-  return publishedLocales
-    .filter((l) => withHome.includes(l))
-    .map((locale) => ({ params: { locale } }));
+  // Always emit a path per published locale so `/en/` (and friends) exist in dev and
+  // match the root `/` redirect. Missing home documents are handled below with 404.
+  return publishedLocales.map((locale) => ({ params: { locale } }));
 }
 
 const locale = Astro.params.locale as SupportedLocale;
@@ -31,7 +27,33 @@ const page = await client.fetch<{
 }>(pageByTypeAndLocale, { locale, pageType: "home" });
 
 if (!page) {
-  return new Response(null, { status: 404 });
+  if (import.meta.env.DEV) {
+    return new Response(
+      `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Home page missing</title>
+  </head>
+  <body style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 40rem; line-height: 1.5;">
+    <h1>Home page missing in CMS</h1>
+    <p>
+      There is no published Sanity <strong>page</strong> with <strong>page type: Home</strong> for locale
+      <code>${locale}</code>.
+    </p>
+    <p>
+      In Studio, under <strong>Pages → Home pages</strong>, create the home document for this locale (or open the draft and click
+      <strong>Publish</strong>). Draft-only pages are not visible to the site.
+    </p>
+  </body>
+</html>`,
+      { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } },
+    );
+  }
+  throw new Error(
+    `[locale]/index: missing Sanity home page for locale "${locale}". Publish _type "page" with pageType "home" and locale "${locale}".`,
+  );
 }
 
 const bodyHtml = richTextToHtml(page.body as never);
