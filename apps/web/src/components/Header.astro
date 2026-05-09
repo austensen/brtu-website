@@ -1,0 +1,38 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import { withLocalePath } from "../lib/i18n/locales";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+
+type Props = {
+  locale: SupportedLocale;
+  organizationName: string;
+};
+
+const { locale, organizationName } = Astro.props;
+const homeHref = withLocalePath(locale, "");
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-brand" href={homeHref}>
+      <img
+        class="site-brand__logo"
+        src="/images/brtu-logo.png"
+        width="52"
+        height="52"
+        alt=""
+        decoding="async"
+        fetchpriority="high"
+      />
+      <span>{organizationName}</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav__primary">
+        <li>
+          <a href={homeHref}>Home</a>
+        </li>
+      </ul>
+      <LanguageSwitcher currentLocale={locale} />
+    </nav>
+  </div>
+</header>

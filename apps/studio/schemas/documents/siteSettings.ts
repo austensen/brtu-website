@@ -1,3 +1,4 @@
+import { localeOptionsForSanity } from "@brtu/locales";
 import { defineField, defineType } from "sanity";
 
 export const siteSettings = defineType({
@@ -9,13 +10,9 @@ export const siteSettings = defineType({
       name: "locale",
       title: "Locale",
       type: "string",
+      description: "One site settings document per locale.",
       options: {
-        list: [
-          { title: "English", value: "en" },
-          { title: "Spanish", value: "es" },
-          { title: "Arabic", value: "ar" },
-          { title: "Chinese (Simplified)", value: "zh" },
-        ],
+        list: localeOptionsForSanity(),
       },
       initialValue: "en",
       validation: (rule) => rule.required(),
@@ -23,6 +20,8 @@ export const siteSettings = defineType({
     defineField({
       name: "translationOf",
       title: "English source document",
+      description:
+        "For non-English settings, link the English settings document. Blank for English.",
       type: "reference",
       to: [{ type: "siteSettings" }],
       options: {
@@ -48,7 +47,7 @@ export const siteSettings = defineType({
       title: "Default locale",
       type: "string",
       options: {
-        list: [{ title: "English", value: "en" }],
+        list: localeOptionsForSanity(),
       },
       initialValue: "en",
       validation: (rule) => rule.required(),
@@ -61,7 +60,12 @@ export const siteSettings = defineType({
         {
           type: "object",
           fields: [
-            { name: "label", title: "Label", type: "string", validation: (rule) => rule.required() },
+            {
+              name: "label",
+              title: "Label",
+              type: "string",
+              validation: (rule) => rule.required(),
+            },
             { name: "url", title: "URL", type: "url", validation: (rule) => rule.required() },
           ],
         },
@@ -75,4 +79,3 @@ export const siteSettings = defineType({
     },
   },
 });
-

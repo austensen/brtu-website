@@ -1,3 +1,4 @@
+import { localeOptionsForSanity } from "@brtu/locales";
 import { defineField, defineType } from "sanity";
 
 export const page = defineType({
@@ -9,13 +10,9 @@ export const page = defineType({
       name: "locale",
       title: "Locale",
       type: "string",
+      description: "Language for this page. Create one document per locale.",
       options: {
-        list: [
-          { title: "English", value: "en" },
-          { title: "Spanish", value: "es" },
-          { title: "Arabic", value: "ar" },
-          { title: "Chinese (Simplified)", value: "zh" },
-        ],
+        list: localeOptionsForSanity(),
       },
       initialValue: "en",
       validation: (rule) => rule.required(),
@@ -23,6 +20,8 @@ export const page = defineType({
     defineField({
       name: "translationOf",
       title: "English source document",
+      description:
+        "For non-English pages, link the published English page this translation replaces. Leave blank for English.",
       type: "reference",
       to: [{ type: "page" }],
       options: {
@@ -52,6 +51,7 @@ export const page = defineType({
     defineField({
       name: "slug",
       title: "Slug",
+      description: "URL segment for this locale (e.g. about, contact).",
       type: "slug",
       options: {
         source: "title",
@@ -80,6 +80,8 @@ export const page = defineType({
     defineField({
       name: "contactForm",
       title: "Contact form labels and messages",
+      description:
+        "All visitor-visible form copy must live here so it can be translated per locale (Netlify Forms).",
       type: "contactFormConfig",
       hidden: ({ document }) => document?.pageType !== "contact",
       validation: (rule) =>
@@ -106,4 +108,3 @@ export const page = defineType({
     },
   },
 });
-

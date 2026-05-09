@@ -1,35 +1,28 @@
 ---
-import LanguageSwitcher from "../../components/LanguageSwitcher.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const title = "BRTU";
 const locale = "en" as const;
+const title = "Bay Ridge Tenant Union";
 ---
 
-<!doctype html>
-<html lang={locale}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <script is:inline>
-      (() => {
-        try {
-          const key = "brtu_locale_redirected_v1";
-          if (sessionStorage.getItem(key)) return;
-          sessionStorage.setItem(key, "1");
-          // WS-B locked: detect once per session on first hit.
-          // WS-B locked: if locale unavailable, default to English.
-          // NOTE: until Sanity is wired, only English is considered published.
-        } catch {}
-      })();
-    </script>
-  </head>
-  <body>
-    <main style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; padding: 2rem;">
-      <LanguageSwitcher currentLocale={locale} />
-      <h1>{title}</h1>
-      <p>WS-B routing skeleton is live under locale-prefixed routes.</p>
-    </main>
-  </body>
-</html>
+<BaseLayout title={title} locale={locale}>
+  <script is:inline slot="head">
+    (() => {
+      try {
+        const key = "brtu_locale_redirected_v1";
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, "1");
+        // WS-B: detect once per session on first hit; full locale routing ties to CMS (WS-F+).
+      } catch {}
+    })();
+  </script>
 
+  <h1>{title}</h1>
+  <p>Locale-prefixed routing is live. Marketing pages and Sanity content will land in the next workstreams.</p>
+  <div class="card" style="margin-top: var(--space-6); max-width: 40rem;">
+    <p style="margin:0;">
+      Example card surface for resources and events. Rich text will use the <code>.prose</code> wrapper when blog
+      and pages ship.
+    </p>
+  </div>
+</BaseLayout>

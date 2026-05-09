@@ -1,15 +1,12 @@
 import { defineConfig } from "sanity";
+import { structureTool } from "sanity/structure";
 
+import { editorChecklistAction } from "./actions/editorChecklistAction";
 import { schemaTypes } from "./schemas";
+import { structure } from "./structure";
 
-const projectId =
-  process.env.SANITY_PROJECT_ID ||
-  process.env.SANITY_STUDIO_PROJECT_ID ||
-  "";
-const dataset =
-  process.env.SANITY_DATASET ||
-  process.env.SANITY_STUDIO_DATASET ||
-  "";
+const projectId = process.env.SANITY_PROJECT_ID || process.env.SANITY_STUDIO_PROJECT_ID || "";
+const dataset = process.env.SANITY_DATASET || process.env.SANITY_STUDIO_DATASET || "";
 const apiVersion = process.env.SANITY_API_VERSION || "2024-01-01";
 
 if (!projectId || !dataset) {
@@ -26,7 +23,13 @@ export default defineConfig({
   dataset,
   apiVersion,
 
+  plugins: [structureTool({ structure })],
+
   schema: {
     types: schemaTypes,
+  },
+
+  document: {
+    actions: (prev) => [...prev, editorChecklistAction],
   },
 });

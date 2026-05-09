@@ -1,32 +1,27 @@
-export const supportedLocales = ["en", "es", "ar", "zh"] as const;
-export type SupportedLocale = (typeof supportedLocales)[number];
+import {
+  defaultLocale,
+  normalizeBrowserLocale,
+  pickBestLocaleFromNavigator as pickBestLocaleFromNavigatorBase,
+  supportedLocales,
+  withLocalePath,
+  type SupportedLocale,
+} from "@brtu/locales";
 
-export const defaultLocale: SupportedLocale = "en";
+export {
+  defaultLocale,
+  normalizeBrowserLocale,
+  supportedLocales,
+  withLocalePath,
+  type SupportedLocale,
+};
 
 // WS-B locked: show only locales with published content.
 // Until Sanity is wired, we conservatively treat only English as published.
+// When more locales ship, update here or derive from build-time GROQ (see `src/lib/sanity/queries.ts`).
 export const publishedLocales: readonly SupportedLocale[] = ["en"];
 
-export function normalizeBrowserLocale(raw: string): SupportedLocale | null {
-  const lower = raw.toLowerCase();
-  if (lower.startsWith("en")) return "en";
-  if (lower.startsWith("es")) return "es";
-  if (lower.startsWith("ar")) return "ar";
-  if (lower.startsWith("zh")) return "zh";
-  return null;
+export function pickBestLocaleFromNavigator(
+  navigatorLanguages: readonly string[],
+): SupportedLocale {
+  return pickBestLocaleFromNavigatorBase(navigatorLanguages, publishedLocales);
 }
-
-export function pickBestLocaleFromNavigator(navigatorLanguages: readonly string[]): SupportedLocale {
-  for (const lang of navigatorLanguages) {
-    const locale = normalizeBrowserLocale(lang);
-    if (locale && publishedLocales.includes(locale)) return locale;
-  }
-  return defaultLocale;
-}
-
-export function withLocalePath(locale: SupportedLocale, path: string): string {
-  const cleaned = path.startsWith("/") ? path.slice(1) : path;
-  const suffix = cleaned.length ? `/${cleaned}` : "/";
-  return `/${locale}${suffix}`.replace(/\/+$/, "/");
-}
-

@@ -1,3 +1,4 @@
+import { localeOptionsForSanity } from "@brtu/locales";
 import { defineField, defineType } from "sanity";
 
 export const resourceCategory = defineType({
@@ -9,13 +10,9 @@ export const resourceCategory = defineType({
       name: "locale",
       title: "Locale",
       type: "string",
+      description: "Categories are per locale; link translations via English source.",
       options: {
-        list: [
-          { title: "English", value: "en" },
-          { title: "Spanish", value: "es" },
-          { title: "Arabic", value: "ar" },
-          { title: "Chinese (Simplified)", value: "zh" },
-        ],
+        list: localeOptionsForSanity(),
       },
       initialValue: "en",
       validation: (rule) => rule.required(),
@@ -23,6 +20,7 @@ export const resourceCategory = defineType({
     defineField({
       name: "translationOf",
       title: "English source document",
+      description: "For non-English categories, link the English category. Blank for English.",
       type: "reference",
       to: [{ type: "resourceCategory" }],
       options: {
@@ -47,4 +45,3 @@ export const resourceCategory = defineType({
     }),
   ],
 });
-

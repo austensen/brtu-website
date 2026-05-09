@@ -1,5 +1,5 @@
 ---
-import { defaultLocale, publishedLocales, type SupportedLocale } from "../lib/i18n/locales";
+import { publishedLocales, type SupportedLocale } from "../lib/i18n/locales";
 
 type Props = {
   currentLocale: SupportedLocale;
@@ -10,20 +10,17 @@ const { currentLocale, pathAfterLocale = "" } = Astro.props;
 const targetPath = (locale: SupportedLocale) => `/${locale}/${pathAfterLocale}`.replace(/\/+$/, "/");
 ---
 
-<nav aria-label="Language">
-  <ul style="display:flex; gap:0.75rem; padding:0; margin:0; list-style:none;">
-    {publishedLocales.map((locale) => (
+<ul class="lang-switcher" aria-label="Language">
+  {
+    publishedLocales.map((locale) => (
       <li>
         <a
           href={targetPath(locale)}
           aria-current={locale === currentLocale ? "page" : undefined}
-          style={locale === currentLocale ? "font-weight:600; text-decoration:underline;" : "text-decoration:underline;"}
         >
           {locale.toUpperCase()}
-          {locale === defaultLocale ? "" : ""}
         </a>
       </li>
-    ))}
-  </ul>
-</nav>
-
+    ))
+  }
+</ul>

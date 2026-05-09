@@ -8,6 +8,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@brtu/locales": "*",
     "astro": "^5.0.0"
   }
 }

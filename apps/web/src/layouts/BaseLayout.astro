@@ -1,0 +1,39 @@
+---
+/**
+ * A11y baseline: skip link, single main landmark, lang + dir, focus-visible in global.css,
+ * reduced-motion in global.css. Keep heading order sane in page templates (one h1 per page).
+ */
+import { isRtlLocale, type SupportedLocale } from "@brtu/locales";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import "../styles/global.css";
+
+type Props = {
+  title: string;
+  locale: SupportedLocale;
+  description?: string;
+};
+
+const { title, locale, description } = Astro.props;
+const dir = isRtlLocale(locale) ? "rtl" : "ltr";
+const orgName = "Bay Ridge Tenant Union";
+---
+
+<!doctype html>
+<html lang={locale} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description ? <meta name="description" content={description} /> : null}
+    <slot name="head" />
+  </head>
+  <body class="layout-shell">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <Header locale={locale} organizationName={orgName} />
+    <main id="main-content" class="layout-main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer organizationName={orgName} />
+  </body>
+</html>
