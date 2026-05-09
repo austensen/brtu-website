@@ -39,6 +39,8 @@ const contactSlug = navRows.find((r) => r.pageType === "contact")?.slug ?? "cont
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/images/brtu-logo.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/images/brtu-logo.png" />
     <title>{title}</title>
     {description ? <meta name="description" content={description} /> : null}
     <slot name="head" />
