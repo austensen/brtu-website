@@ -8,6 +8,9 @@ dist/
 .cache/
 .netlify/
 
+# Generated event calendar feeds (see apps/web/scripts/generate-event-ics.ts)
+apps/web/public/calendar/
+
 apps/**/node_modules/
 
 # Sanity
