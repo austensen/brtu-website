@@ -1,88 +1,62 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-
-const MOBILE_MQ = "(max-width: 47.9375rem)";
-
-function subscribeMobile(onStoreChange: () => void) {
-  const mq = window.matchMedia(MOBILE_MQ);
-  const onChange = () => onStoreChange();
-  if (typeof mq.addEventListener === "function") {
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }
-  mq.addListener(onChange);
-  return () => mq.removeListener(onChange);
-}
-
-function getMobileSnapshot() {
-  return window.matchMedia(MOBILE_MQ).matches;
-}
-
-function getMobileServerSnapshot() {
-  return false;
-}
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavMobileMatches } from "../hooks/useMediaQuery";
 
 export default function SiteNavToggle() {
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const openRef = useRef(false);
   const [open, setOpen] = useState(false);
-
-  const isMobile = useSyncExternalStore(
-    subscribeMobile,
-    getMobileSnapshot,
-    getMobileServerSnapshot,
-  );
-
-  openRef.current = open;
+  const isMobile = useNavMobileMatches();
 
   useEffect(() => {
     if (!isMobile) setOpen(false);
   }, [isMobile]);
 
-  useEffect(() => {
-    const btn = buttonRef.current;
-    const header = btn?.closest("[data-site-header]");
-    if (!header || !btn) return;
-    if (isMobile) header.setAttribute("data-menu-enhanced", "");
-    else header.removeAttribute("data-menu-enhanced");
-  }, [isMobile]);
+  useLayoutEffect(() => {
+    const header = buttonRef.current?.closest("[data-site-header]");
+    if (!header) return;
+
+    if (!isMobile) {
+      header.removeAttribute("data-menu-enhanced");
+      header.removeAttribute("data-menu-open");
+      return;
+    }
+
+    header.setAttribute("data-menu-enhanced", "");
+    if (open) {
+      header.setAttribute("data-menu-open", "");
+    } else {
+      header.removeAttribute("data-menu-open");
+    }
+  }, [isMobile, open]);
 
   useEffect(() => {
-    const btn = buttonRef.current;
-    const header = btn?.closest("[data-site-header]");
-    if (!header || !btn) return;
-    if (open) header.setAttribute("data-menu-open", "");
-    else header.removeAttribute("data-menu-open");
-  }, [open]);
+    if (!open || !isMobile) return;
 
-  useEffect(() => {
-    const toggle = buttonRef.current;
-    if (!toggle) return;
-    const header = toggle.closest("[data-site-header]");
-    const nav = header?.querySelector<HTMLElement>("[data-site-nav]");
-    if (!header || !nav) return;
-
-    const onDocKeydown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || !openRef.current) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
       setOpen(false);
-      toggle.focus();
+      buttonRef.current?.focus();
     };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, isMobile]);
+
+  useEffect(() => {
+    if (!open || !isMobile) return;
+
+    const toggle = buttonRef.current;
+    const header = toggle?.closest("[data-site-header]");
+    const nav = header?.querySelector<HTMLElement>("[data-site-nav]");
+    if (!nav) return;
 
     const onNavClick = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
-      if (t.closest?.("a") && openRef.current) setOpen(false);
+      if (t.closest?.("a")) setOpen(false);
     };
 
-    const onToggleClick = () => setOpen((v) => !v);
-
-    document.addEventListener("keydown", onDocKeydown);
     nav.addEventListener("click", onNavClick);
-    toggle.addEventListener("click", onToggleClick);
-    return () => {
-      document.removeEventListener("keydown", onDocKeydown);
-      nav.removeEventListener("click", onNavClick);
-      toggle.removeEventListener("click", onToggleClick);
-    };
-  }, []);
+    return () => nav.removeEventListener("click", onNavClick);
+  }, [open, isMobile]);
 
   return (
     <button
@@ -90,9 +64,10 @@ export default function SiteNavToggle() {
       type="button"
       className="site-nav__toggle"
       aria-controls="site-nav"
-      aria-expanded={open}
+      aria-expanded={open && isMobile}
       hidden={!isMobile}
       data-site-nav-toggle
+      onClick={() => setOpen((v) => !v)}
     >
       <span className="site-nav__toggle-icon" aria-hidden="true" />
       <span className="visually-hidden">Menu</span>
