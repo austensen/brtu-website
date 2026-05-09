@@ -68,10 +68,27 @@ const langSwitcherAlternates = page
 const pathAfterLocale = page?.slug ?? slug;
 const sent = Astro.url.searchParams.get("sent") === "1";
 
-const contactFormAction =
+const contactFormPostPath =
   page?.pageType === "contact" && page.contactForm
-    ? `${withLocalePath(locale, page.slug)}?sent=1`
+    ? withLocalePath(locale, page.slug)
     : undefined;
+
+const contactFormAction =
+  contactFormPostPath !== undefined ? `${contactFormPostPath}?sent=1` : undefined;
+
+const marketingPageNeedsHydration =
+  page?.pageType === "contact" && Boolean(page.contactForm) && !sent;
+
+const sharedMarketingProps = {
+  title: page!.title,
+  bodyHtml,
+  pageType: page!.pageType,
+  contactEmail: page!.contactEmail,
+  contactForm: page!.contactForm,
+  contactFormAction,
+  contactFormPostPath,
+  sent,
+};
 ---
 
 {
@@ -84,15 +101,11 @@ const contactFormAction =
       langSwitcherAlternates={langSwitcherAlternates}
       pathAfterLocale={pathAfterLocale}
     >
-      <MarketingPageContent
-        title={page!.title}
-        bodyHtml={bodyHtml}
-        pageType={page!.pageType}
-        contactEmail={page!.contactEmail}
-        contactForm={page!.contactForm}
-        contactFormAction={contactFormAction}
-        sent={sent}
-      />
+      {marketingPageNeedsHydration ? (
+        <MarketingPageContent client:load {...sharedMarketingProps} />
+      ) : (
+        <MarketingPageContent {...sharedMarketingProps} />
+      )}
     </BaseLayout>
   )
 }

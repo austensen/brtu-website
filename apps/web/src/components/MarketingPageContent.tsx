@@ -1,14 +1,8 @@
+import ContactNetlifyForm from "./ContactNetlifyForm";
 import styles from "./MarketingPageContent.module.css";
+import type { MarketingContactFormFields } from "./marketingContactFormTypes";
 
-export type MarketingContactFormFields = {
-  formName: string;
-  nameLabel: string;
-  emailLabel: string;
-  messageLabel: string;
-  submitLabel: string;
-  successMessage: string;
-  errorMessage: string;
-};
+export type { MarketingContactFormFields };
 
 type Props = {
   title: string;
@@ -18,6 +12,8 @@ type Props = {
   contactForm?: MarketingContactFormFields;
   /** Full form action URL including `?sent=1` query */
   contactFormAction?: string;
+  /** Path only (no query); POST target for Netlify when showing the form */
+  contactFormPostPath?: string;
   sent: boolean;
 };
 
@@ -28,6 +24,7 @@ export default function MarketingPageContent({
   contactEmail,
   contactForm,
   contactFormAction,
+  contactFormPostPath,
   sent,
 }: Props) {
   const showContactChrome = pageType === "contact" && contactForm;
@@ -45,7 +42,7 @@ export default function MarketingPageContent({
         </p>
       ) : null}
 
-      {showContactChrome && contactForm && contactFormAction ? (
+      {showContactChrome && contactForm && contactFormAction && contactFormPostPath ? (
         <section
           className={`card ${styles.formSection}`}
           aria-labelledby="contact-form-heading"
@@ -56,60 +53,12 @@ export default function MarketingPageContent({
           {sent ? (
             <p role="status">{contactForm.successMessage}</p>
           ) : (
-            <form
-              name={contactForm.formName}
-              method="POST"
-              data-netlify="true"
-              action={contactFormAction}
-              aria-describedby="contact-form-errors"
-              {...{ "netlify-honeypot": "bot-field" }}
-            >
-              <input type="hidden" name="form-name" value={contactForm.formName} />
-              <p className="visually-hidden">
-                <label>
-                  Don’t fill this out if you’re human:
-                  <input name="bot-field" />
-                </label>
-              </p>
-              <div className={styles.fieldStack}>
-                <label>
-                  <span className={styles.labelText}>{contactForm.nameLabel}</span>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    autoComplete="name"
-                    className={styles.input}
-                  />
-                </label>
-                <label>
-                  <span className={styles.labelText}>{contactForm.emailLabel}</span>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    autoComplete="email"
-                    className={styles.input}
-                  />
-                </label>
-                <label>
-                  <span className={styles.labelText}>{contactForm.messageLabel}</span>
-                  <textarea
-                    name="message"
-                    required
-                    rows={6}
-                    className={styles.textarea}
-                  />
-                </label>
-                <button type="submit" className="btn btn--primary">
-                  {contactForm.submitLabel}
-                </button>
-              </div>
-            </form>
+            <ContactNetlifyForm
+              contactForm={contactForm}
+              postPath={contactFormPostPath}
+              successUrl={contactFormAction}
+            />
           )}
-          <p id="contact-form-errors" className={styles.formFootnote}>
-            {contactForm.errorMessage}
-          </p>
         </section>
       ) : null}
     </>
