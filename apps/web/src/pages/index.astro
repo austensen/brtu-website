@@ -1,6 +1,8 @@
 ---
 // Canonical routes are locale-prefixed (e.g. /en/...)
 // This top-level page exists only to support static hosting fallback.
+import "../styles/global.css";
+
 const title = "BRTU";
 ---
 
@@ -13,7 +15,7 @@ const title = "BRTU";
     <meta http-equiv="refresh" content="0; url=/en/" />
   </head>
   <body>
-    <main style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; padding: 2rem;">
+    <main class="standalone-main">
       <h1>{title}</h1>
       <p>Redirecting to English…</p>
     </main>
