@@ -5,7 +5,9 @@
  */
 import { isRtlLocale, type SupportedLocale } from "@brtu/locales";
 import Footer from "../components/Footer";
-import Header from "../components/Header.astro";
+import HeaderBrand from "../components/HeaderBrand";
+import HeaderNav from "../components/HeaderNav";
+import SiteNavToggle from "../components/SiteNavToggle";
 import type { LangHrefMap } from "../lib/i18n/langAlternates";
 import { getSanityClient } from "../lib/sanity/client";
 import { marketingNavSlugsByLocale } from "../lib/sanity/queries";
@@ -43,14 +45,19 @@ const contactSlug = navRows.find((r) => r.pageType === "contact")?.slug ?? "cont
   </head>
   <body class="layout-shell">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <Header
-      locale={locale}
-      organizationName={orgName}
-      aboutSlug={aboutSlug}
-      contactSlug={contactSlug}
-      langSwitcherAlternates={langSwitcherAlternates}
-      pathAfterLocale={pathAfterLocale}
-    />
+    <header class="site-header" data-site-header>
+      <div class="site-header__inner">
+        <HeaderBrand locale={locale} organizationName={orgName} />
+        <SiteNavToggle client:load />
+        <HeaderNav
+          locale={locale}
+          aboutSlug={aboutSlug}
+          contactSlug={contactSlug}
+          langSwitcherAlternates={langSwitcherAlternates}
+          pathAfterLocale={pathAfterLocale}
+        />
+      </div>
+    </header>
     <main id="main-content" class="layout-main" tabindex="-1">
       <slot />
     </main>
