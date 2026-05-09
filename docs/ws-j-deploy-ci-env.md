@@ -49,6 +49,8 @@ Configure these **repository secrets** (Settings → Secrets and variables → A
 
 The job runs `npm ci` at the repo root, then `npm run deploy:studio`.
 
+For **hosted Studio** (`*.sanity.studio`), the production bundle is built with Vite, which only exposes variables prefixed with **`SANITY_STUDIO_`** to browser code ([environment variables](https://www.sanity.io/docs/environment-variables)). The workflow therefore sets `SANITY_STUDIO_PROJECT_ID` and `SANITY_STUDIO_DATASET` from the same secrets as `SANITY_PROJECT_ID` / `SANITY_DATASET`. If those studio-prefixed vars are missing at build time, the deployed site throws “missing SANITY_PROJECT_ID/SANITY_DATASET” in the browser even when CLI deploy succeeds.
+
 ## Sanity CORS origins
 
 Configure CORS in the Sanity project to allow:
