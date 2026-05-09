@@ -1,5 +1,7 @@
 import type { SupportedLocale } from "@brtu/locales";
 
+import styles from "./BlogPostArticle.module.css";
+
 type Props = {
   locale: SupportedLocale;
   title: string;
@@ -16,18 +18,18 @@ export default function BlogPostArticle({ locale, title, publishedAt, heroUrl, h
     <article>
       <h1>{title}</h1>
       <p>
-        <time dateTime={publishedAt} style={{ color: "var(--color-text-muted)" }}>
+        <time dateTime={publishedAt} className={styles.date}>
           {dateFmt.format(new Date(publishedAt))}
         </time>
       </p>
       {heroUrl ? (
-        <p style={{ margin: "var(--space-6) 0" }}>
+        <p className={styles.heroWrap}>
           <img
             src={heroUrl}
             alt={heroAlt}
             width={1200}
             height={675}
-            style={{ width: "100%", height: "auto", borderRadius: "var(--radius)" }}
+            className={styles.heroImg}
             loading="eager"
             decoding="async"
           />

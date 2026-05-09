@@ -1,5 +1,7 @@
 import type { SupportedLocale } from "@brtu/locales";
 
+import styles from "./EventDetail.module.css";
+
 type Props = {
   locale: SupportedLocale;
   title: string;
@@ -41,10 +43,10 @@ export default function EventDetail({
   return (
     <article>
       <h1>{title}</h1>
-      <p style={{ color: "var(--color-text-muted)" }}>
+      <p className={styles.range}>
         {formatRange(startDateTime, endDateTime, timezone, locale)}
       </p>
-      <p style={{ margin: "var(--space-4) 0", display: "flex", flexWrap: "wrap", gap: "var(--space-3)" }}>
+      <p className={styles.actions}>
         <a className="btn btn--primary" href={icsHref} download>
           Add to calendar (.ics)
         </a>

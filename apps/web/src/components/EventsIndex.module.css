@@ -1,0 +1,32 @@
+.section {
+  margin-top: var(--space-8);
+}
+
+.sectionPast {
+  margin-top: calc(var(--space-8) + var(--space-2));
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+}
+
+.cardItem {
+  margin-bottom: var(--space-4);
+}
+
+.eventTitle {
+  margin: 0 0 var(--space-2);
+  font-size: 1.15rem;
+}
+
+.range {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}

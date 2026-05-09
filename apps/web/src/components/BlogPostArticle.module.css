@@ -1,0 +1,13 @@
+.date {
+  color: var(--color-text-muted);
+}
+
+.heroWrap {
+  margin: var(--space-6) 0;
+}
+
+.heroImg {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}

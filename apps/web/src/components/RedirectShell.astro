@@ -2,6 +2,8 @@
 /**
  * Static-friendly redirect when a locale has no translation (WS-B silent English).
  */
+import "../styles/global.css";
+
 type Props = {
   to: string;
 };
@@ -18,9 +20,7 @@ const { to } = Astro.props;
     <meta http-equiv="refresh" content={"0;url=" + to} />
     <link rel="canonical" href={to} />
   </head>
-  <body
-    style="font-family: system-ui, sans-serif; padding: 2rem; color: #1a1a1a; background: #fff;"
-  >
+  <body class="standalone-body">
     <p>
       <a href={to}>Continue to the English page</a>
     </p>

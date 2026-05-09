@@ -1,0 +1,26 @@
+/* Design tokens: BRTU logo palette — primary red #C82327, black/white neutrals.
+ * Links on body: dark text + underline; red reserved for fills and hover/focus accents.
+ * prefers-reduced-motion: minimize transitions.
+ */
+
+:root {
+  --color-primary: #c82327;
+  --color-primary-hover: #a61d21;
+  --color-on-primary: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #5c5c5c;
+  --color-bg: #ffffff;
+  --color-border: #d4d4d4;
+  --color-focus: #1a1a1a;
+  --font-ui:
+    system-ui, -apple-system, "Segoe UI", roboto, "Helvetica Neue", helvetica, arial, sans-serif;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius: 6px;
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.08);
+  --max-width: 72rem;
+}

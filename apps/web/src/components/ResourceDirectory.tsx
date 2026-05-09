@@ -1,6 +1,8 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState } from "react";
 import type { SupportedLocale } from "@brtu/locales";
 import { withLocalePath } from "@brtu/locales";
+
+import styles from "./ResourceDirectory.module.css";
 
 export type ResourceDirectoryCategory = {
   slug: string;
@@ -36,28 +38,17 @@ export default function ResourceDirectory({ locale, categories, resources }: Pro
     [locale],
   );
 
-  const buttonStyle: CSSProperties = {
-    border: "2px solid var(--color-border)",
-    background: "var(--color-bg)",
-    color: "var(--color-text)",
-  };
-
   return (
     <>
-      <div className="resource-toolbar" style={{ margin: "var(--space-6) 0" }}>
+      <div className={`resource-toolbar ${styles.toolbar}`}>
         <span id="filter-label" className="visually-hidden">
           Filter by category
         </span>
-        <div
-          style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}
-          role="group"
-          aria-labelledby="filter-label"
-        >
+        <div className={styles.filterGroup} role="group" aria-labelledby="filter-label">
           <button
             type="button"
-            className="btn btn--primary"
+            className={`btn ${styles.filterNeutral}`}
             aria-pressed={selected === ALL}
-            style={buttonStyle}
             onClick={() => setSelected(ALL)}
           >
             All
@@ -66,9 +57,8 @@ export default function ResourceDirectory({ locale, categories, resources }: Pro
             <button
               key={cat.slug}
               type="button"
-              className="btn btn--primary"
+              className={`btn ${styles.filterNeutral}`}
               aria-pressed={selected === cat.slug}
-              style={buttonStyle}
               onClick={() => setSelected(cat.slug)}
             >
               {cat.title}
@@ -77,29 +67,15 @@ export default function ResourceDirectory({ locale, categories, resources }: Pro
         </div>
       </div>
 
-      <ul className="resource-list" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+      <ul className={`resource-list ${styles.list}`}>
         {visible.map((r) => (
-          <li
-            key={r.slug}
-            className="card resource-item"
-            style={{ marginBottom: "var(--space-4)" }}
-          >
-            <h2 style={{ margin: "0 0 var(--space-2)", fontSize: "1.15rem" }}>
+          <li key={r.slug} className={`card resource-item ${styles.listItem}`}>
+            <h2 className={styles.title}>
               <a href={withLocalePath(locale, `resources/${r.slug}`)}>{r.title}</a>
             </h2>
-            {r.category ? (
-              <p
-                style={{
-                  margin: "0 0 var(--space-2)",
-                  fontSize: "0.9rem",
-                  color: "var(--color-text-muted)",
-                }}
-              >
-                {r.category.title}
-              </p>
-            ) : null}
-            <p style={{ margin: "0 0 var(--space-2)" }}>{r.summary}</p>
-            <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--color-text-muted)" }}>
+            {r.category ? <p className={styles.category}>{r.category.title}</p> : null}
+            <p className={styles.summary}>{r.summary}</p>
+            <p className={styles.updated}>
               Updated{" "}
               <time dateTime={r.updatedAt}>
                 {dateFormatter.format(new Date(r.updatedAt))}

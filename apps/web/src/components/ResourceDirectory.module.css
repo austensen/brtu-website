@@ -1,0 +1,46 @@
+.toolbar {
+  margin: var(--space-6) 0;
+}
+
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.filterNeutral {
+  border: 2px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listItem {
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.15rem;
+}
+
+.category {
+  margin: 0 0 var(--space-2);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.summary {
+  margin: 0 0 var(--space-2);
+}
+
+.updated {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}

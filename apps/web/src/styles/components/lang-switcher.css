@@ -1,0 +1,27 @@
+/* Language switcher */
+.lang-switcher {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.lang-switcher a {
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.lang-switcher a:hover,
+.lang-switcher a:focus-visible {
+  color: var(--color-primary);
+}
+
+.lang-switcher a[aria-current="page"] {
+  color: var(--color-primary);
+  text-decoration-thickness: 3px;
+}

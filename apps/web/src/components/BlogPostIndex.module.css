@@ -1,0 +1,50 @@
+.meta {
+  color: var(--color-text-muted);
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-6) 0 0;
+}
+
+.cardItem {
+  margin-bottom: var(--space-4);
+}
+
+.heroLink {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.heroImg {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.postTitle {
+  margin: 0 0 var(--space-2);
+  font-size: 1.25rem;
+}
+
+.date {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.pagination {
+  margin-top: var(--space-8);
+}
+
+.paginationIntro {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+
+.paginationRow {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}

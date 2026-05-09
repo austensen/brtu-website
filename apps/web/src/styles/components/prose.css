@@ -1,0 +1,21 @@
+/* Prose (Portable Text wrappers in later workstreams) */
+.prose {
+  max-width: 65ch;
+}
+
+.prose :where(h1, h2, h3) {
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.prose :where(a) {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.prose :where(a):hover,
+.prose :where(a):focus-visible {
+  color: var(--color-primary);
+}

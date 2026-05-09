@@ -1,0 +1,10 @@
+.range {
+  color: var(--color-text-muted);
+}
+
+.actions {
+  margin: var(--space-4) 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

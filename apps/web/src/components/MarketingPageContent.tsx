@@ -1,3 +1,5 @@
+import styles from "./MarketingPageContent.module.css";
+
 export type MarketingContactFormFields = {
   formName: string;
   nameLabel: string;
@@ -36,7 +38,7 @@ export default function MarketingPageContent({
       <div className="prose" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
       {pageType === "contact" && contactEmail && contactForm ? (
-        <p style={{ marginTop: "var(--space-6)" }}>
+        <p className={styles.mailtoWrap}>
           <a className="btn btn--primary" href={`mailto:${contactEmail}`}>
             {contactForm.emailLabel}
           </a>
@@ -45,8 +47,7 @@ export default function MarketingPageContent({
 
       {showContactChrome && contactForm && contactFormAction ? (
         <section
-          className="card"
-          style={{ marginTop: "var(--space-6)", maxWidth: "40rem" }}
+          className={`card ${styles.formSection}`}
           aria-labelledby="contact-form-heading"
         >
           <p id="contact-form-heading" className="visually-hidden">
@@ -70,58 +71,34 @@ export default function MarketingPageContent({
                   <input name="bot-field" />
                 </label>
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+              <div className={styles.fieldStack}>
                 <label>
-                  <span style={{ display: "block", fontWeight: 600, marginBottom: "var(--space-2)" }}>
-                    {contactForm.nameLabel}
-                  </span>
+                  <span className={styles.labelText}>{contactForm.nameLabel}</span>
                   <input
                     type="text"
                     name="name"
                     required
                     autoComplete="name"
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-3)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius)",
-                      font: "inherit",
-                    }}
+                    className={styles.input}
                   />
                 </label>
                 <label>
-                  <span style={{ display: "block", fontWeight: 600, marginBottom: "var(--space-2)" }}>
-                    {contactForm.emailLabel}
-                  </span>
+                  <span className={styles.labelText}>{contactForm.emailLabel}</span>
                   <input
                     type="email"
                     name="email"
                     required
                     autoComplete="email"
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-3)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius)",
-                      font: "inherit",
-                    }}
+                    className={styles.input}
                   />
                 </label>
                 <label>
-                  <span style={{ display: "block", fontWeight: 600, marginBottom: "var(--space-2)" }}>
-                    {contactForm.messageLabel}
-                  </span>
+                  <span className={styles.labelText}>{contactForm.messageLabel}</span>
                   <textarea
                     name="message"
                     required
                     rows={6}
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-3)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius)",
-                      font: "inherit",
-                    }}
+                    className={styles.textarea}
                   />
                 </label>
                 <button type="submit" className="btn btn--primary">
@@ -130,10 +107,7 @@ export default function MarketingPageContent({
               </div>
             </form>
           )}
-          <p
-            id="contact-form-errors"
-            style={{ marginTop: "var(--space-4)", fontSize: "0.9rem", color: "var(--color-text-muted)" }}
-          >
+          <p id="contact-form-errors" className={styles.formFootnote}>
             {contactForm.errorMessage}
           </p>
         </section>

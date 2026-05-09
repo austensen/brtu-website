@@ -1,6 +1,8 @@
 import type { SupportedLocale } from "@brtu/locales";
 import { withLocalePath } from "../lib/i18n/locales";
 
+import styles from "./EventsIndex.module.css";
+
 export type EventsIndexEvent = {
   title: string;
   slug: string;
@@ -31,18 +33,18 @@ export default function EventsIndex({ locale, upcoming, past }: Props) {
     <>
       <h1>Events</h1>
 
-      <section aria-labelledby="upcoming-heading" style={{ marginTop: "var(--space-8)" }}>
+      <section aria-labelledby="upcoming-heading" className={styles.section}>
         <h2 id="upcoming-heading">Upcoming</h2>
         {upcoming.length === 0 ? (
-          <p style={{ color: "var(--color-text-muted)" }}>No upcoming events.</p>
+          <p className={styles.muted}>No upcoming events.</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: "var(--space-4) 0 0" }}>
+          <ul className={styles.list}>
             {upcoming.map((ev) => (
-              <li key={ev.slug} className="card" style={{ marginBottom: "var(--space-4)" }}>
-                <h3 style={{ margin: "0 0 var(--space-2)", fontSize: "1.15rem" }}>
+              <li key={ev.slug} className={`card ${styles.cardItem}`}>
+                <h3 className={styles.eventTitle}>
                   <a href={withLocalePath(locale, `events/${ev.slug}`)}>{ev.title}</a>
                 </h3>
-                <p style={{ margin: 0, color: "var(--color-text-muted)", fontSize: "0.95rem" }}>
+                <p className={styles.range}>
                   {formatRange(ev.startDateTime, ev.endDateTime, ev.timezone, locale)}
                 </p>
               </li>
@@ -51,18 +53,18 @@ export default function EventsIndex({ locale, upcoming, past }: Props) {
         )}
       </section>
 
-      <section aria-labelledby="past-heading" style={{ marginTop: "var(--space-10)" }}>
+      <section aria-labelledby="past-heading" className={styles.sectionPast}>
         <h2 id="past-heading">Past</h2>
         {past.length === 0 ? (
-          <p style={{ color: "var(--color-text-muted)" }}>No past events.</p>
+          <p className={styles.muted}>No past events.</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: "var(--space-4) 0 0" }}>
+          <ul className={styles.list}>
             {past.map((ev) => (
-              <li key={ev.slug} className="card" style={{ marginBottom: "var(--space-4)" }}>
-                <h3 style={{ margin: "0 0 var(--space-2)", fontSize: "1.15rem" }}>
+              <li key={ev.slug} className={`card ${styles.cardItem}`}>
+                <h3 className={styles.eventTitle}>
                   <a href={withLocalePath(locale, `events/${ev.slug}`)}>{ev.title}</a>
                 </h3>
-                <p style={{ margin: 0, color: "var(--color-text-muted)", fontSize: "0.95rem" }}>
+                <p className={styles.range}>
                   {formatRange(ev.startDateTime, ev.endDateTime, ev.timezone, locale)}
                 </p>
               </li>
