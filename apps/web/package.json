@@ -8,14 +8,19 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@astrojs/react": "^5.0.0",
     "@brtu/locales": "*",
     "@portabletext/to-html": "^2.0.17",
     "@sanity/client": "^7.22.0",
     "@sanity/image-url": "^1.2.0",
     "astro": "^5.0.0",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "tsx": "^4.21.0"
   }
 }

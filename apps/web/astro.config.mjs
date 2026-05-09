@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { loadEnv } from "vite";
@@ -18,5 +19,6 @@ export default defineConfig(({ mode }) => {
   return {
     output: "static",
     site,
+    integrations: [react()],
   };
 });
