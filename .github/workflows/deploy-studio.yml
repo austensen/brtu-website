@@ -11,6 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     env:
       SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
       SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
