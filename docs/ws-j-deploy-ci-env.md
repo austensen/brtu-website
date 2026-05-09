@@ -15,7 +15,10 @@ This project follows a two-site deployment model:
    - `PUBLIC_SANITY_PROJECT_ID`
    - `PUBLIC_SANITY_DATASET`
    - `PUBLIC_SANITY_API_VERSION` (optional)
+   - `PUBLIC_SITE_URL` (production origin without a trailing slash; used for Astro `site` and event `.ics` links)
 4. Deploy from the default branch.
+
+The `apps/web` build runs `tsx scripts/generate-event-ics.ts` before `astro build`, writing files under `public/calendar/[locale]/` that are served as `/calendar/[locale]/[slug].ics`.
 
 ## Studio deployment (Sanity hosted)
 

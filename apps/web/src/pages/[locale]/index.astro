@@ -1,0 +1,60 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { fetchHomeLangHrefAlternates, englishSourceId } from "../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales } from "../../lib/i18n/locales";
+import { getSanityClient } from "../../lib/sanity/client";
+import { pageByTypeAndLocale } from "../../lib/sanity/queries";
+import { richTextToHtml } from "../../lib/sanity/portableText";
+
+export async function getStaticPaths() {
+  const client = getSanityClient();
+  const withHome = await client.fetch<string[]>(
+    `array::unique(*[_type == "page" && pageType == "home"].locale)`,
+  );
+  return publishedLocales
+    .filter((l) => withHome.includes(l))
+    .map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as SupportedLocale;
+if (!supportedLocales.includes(locale)) {
+  return new Response(null, { status: 404 });
+}
+
+const client = getSanityClient();
+const page = await client.fetch<{
+  _id: string;
+  title: string;
+  body: unknown;
+  translationOf?: { _id: string } | null;
+}>(pageByTypeAndLocale, { locale, pageType: "home" });
+
+if (!page) {
+  return new Response(null, { status: 404 });
+}
+
+const bodyHtml = richTextToHtml(page.body as never);
+const enId = englishSourceId(page);
+const langSwitcherAlternates = await fetchHomeLangHrefAlternates(client, enId, publishedLocales);
+---
+
+<BaseLayout
+  title={page.title}
+  locale={locale}
+  langSwitcherAlternates={langSwitcherAlternates}
+  pathAfterLocale=""
+>
+  <script is:inline slot="head">
+    (() => {
+      try {
+        const key = "brtu_locale_redirected_v1";
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, "1");
+      } catch {}
+    })();
+  </script>
+
+  <h1>{page.title}</h1>
+  <div class="prose" set:html={bodyHtml} />
+</BaseLayout>

@@ -1,0 +1,28 @@
+---
+/**
+ * Static-friendly redirect when a locale has no translation (WS-B silent English).
+ */
+type Props = {
+  to: string;
+};
+
+const { to } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+    <meta http-equiv="refresh" content={"0;url=" + to} />
+    <link rel="canonical" href={to} />
+  </head>
+  <body
+    style="font-family: system-ui, sans-serif; padding: 2rem; color: #1a1a1a; background: #fff;"
+  >
+    <p>
+      <a href={to}>Continue to the English page</a>
+    </p>
+  </body>
+</html>

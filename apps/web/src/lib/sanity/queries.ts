@@ -50,6 +50,21 @@ export const pageByTypeAndLocale = /* groq */ `
   }
 `;
 
+/** Marketing page by slug (about/contact only), for [slug].astro detail + redirects. */
+export const marketingPageBySlugAndLocale = /* groq */ `
+  *[_type == "page" && locale == $locale && slug.current == $slug && pageType != "home"][0]{
+    _id,
+    locale,
+    pageType,
+    title,
+    "slug": slug.current,
+    body,
+    contactEmail,
+    contactForm,
+    translationOf->{ _id, "slug": slug.current, locale }
+  }
+`;
+
 /** Blog listing for a locale, newest first. */
 export const postsByLocale = /* groq */ `
   *[_type == "post" && locale == $locale] | order(publishedAt desc) {
@@ -70,7 +85,10 @@ export const postBySlugAndLocale = /* groq */ `
     title,
     "slug": slug.current,
     publishedAt,
-    heroImage,
+    heroImage{
+      ...,
+      alt
+    },
     body,
     translationOf->{ _id, "slug": slug.current, locale }
   }
@@ -111,7 +129,13 @@ export const resourceBySlugAndLocale = /* groq */ `
     summary,
     updatedAt,
     category->{ title, "slug": slug.current },
-    file,
+    file{
+      asset->{
+        url,
+        originalFilename,
+        mimeType
+      }
+    },
     externalUrl,
     translationOf->{ _id, "slug": slug.current, locale }
   }
@@ -127,6 +151,30 @@ export const eventsByLocale = /* groq */ `
     endDateTime,
     timezone,
     translationOf->{ _id, "slug": slug.current }
+  }
+`;
+
+/** Upcoming events for a locale (start >= now), soonest first. */
+export const upcomingEventsByLocale = /* groq */ `
+  *[_type == "event" && locale == $locale && startDateTime >= $now] | order(startDateTime asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone
+  }
+`;
+
+/** Past events for a locale, most recent first. */
+export const pastEventsByLocale = /* groq */ `
+  *[_type == "event" && locale == $locale && startDateTime < $now] | order(startDateTime desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone
   }
 `;
 
@@ -153,4 +201,94 @@ export const distinctPublishedLocales = /* groq */ `
   array::unique(
     *[_type in ["page","post","resource","event","siteSettings","resourceCategory"]].locale
   )
+`;
+
+/** About + contact slugs for primary nav (per locale). */
+export const marketingNavSlugsByLocale = /* groq */ `
+  *[_type == "page" && locale == $locale && pageType in ["about", "contact"]]{
+    pageType,
+    "slug": slug.current
+  }
+`;
+
+/** Minimal rows to build static paths + translation fallbacks. */
+export const allPostsPathRows = /* groq */ `
+  *[_type == "post"]{
+    _id,
+    locale,
+    "slug": slug.current,
+    "translationEnId": translationOf._ref
+  }
+`;
+
+export const allMarketingPagePathRows = /* groq */ `
+  *[_type == "page" && pageType in ["about", "contact"]]{
+    _id,
+    locale,
+    pageType,
+    "slug": slug.current,
+    "translationEnId": translationOf._ref
+  }
+`;
+
+export const allResourcePathRows = /* groq */ `
+  *[_type == "resource"]{
+    _id,
+    locale,
+    "slug": slug.current,
+    "translationEnId": translationOf._ref
+  }
+`;
+
+export const allEventPathRows = /* groq */ `
+  *[_type == "event"]{
+    _id,
+    locale,
+    "slug": slug.current,
+    "translationEnId": translationOf._ref
+  }
+`;
+
+/** Locales + slugs tied to the same English source document (for language switcher). */
+export const slugsByEnglishSource = /* groq */ `
+  *[_type == $docType && (_id == $enId || translationOf._ref == $enId)]{
+    locale,
+    "slug": slug.current
+  }
+`;
+
+export const postCountByLocale = /* groq */ `
+  count(*[_type == "post" && locale == $locale])
+`;
+
+/** Paginated posts (end index exclusive in GROQ slice). */
+export const postsByLocaleSlice = /* groq */ `
+  *[_type == "post" && locale == $locale] | order(publishedAt desc)[$start...$end] {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    heroImage{
+      ...,
+      alt
+    },
+    translationOf->{ _id, "slug": slug.current }
+  }
+`;
+
+/** All events (any locale) for ICS generation. */
+export const allEventsForIcs = /* groq */ `
+  *[_type == "event"]{
+    _id,
+    locale,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone,
+    location,
+    joinUrl,
+    mapLink,
+    description
+  }
 `;

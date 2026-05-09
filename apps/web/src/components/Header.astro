@@ -1,14 +1,20 @@
 ---
 import type { SupportedLocale } from "@brtu/locales";
 import { withLocalePath } from "../lib/i18n/locales";
+import type { LangHrefMap } from "../lib/i18n/langAlternates";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 
 type Props = {
   locale: SupportedLocale;
   organizationName: string;
+  aboutSlug: string;
+  contactSlug: string;
+  langSwitcherAlternates?: LangHrefMap;
+  pathAfterLocale?: string;
 };
 
-const { locale, organizationName } = Astro.props;
+const { locale, organizationName, aboutSlug, contactSlug, langSwitcherAlternates, pathAfterLocale } =
+  Astro.props;
 const homeHref = withLocalePath(locale, "");
 ---
 
@@ -31,8 +37,27 @@ const homeHref = withLocalePath(locale, "");
         <li>
           <a href={homeHref}>Home</a>
         </li>
+        <li>
+          <a href={withLocalePath(locale, aboutSlug)}>About</a>
+        </li>
+        <li>
+          <a href={withLocalePath(locale, contactSlug)}>Contact</a>
+        </li>
+        <li>
+          <a href={withLocalePath(locale, "blog")}>Blog</a>
+        </li>
+        <li>
+          <a href={withLocalePath(locale, "resources")}>Resources</a>
+        </li>
+        <li>
+          <a href={withLocalePath(locale, "events")}>Events</a>
+        </li>
       </ul>
-      <LanguageSwitcher currentLocale={locale} />
+      <LanguageSwitcher
+        currentLocale={locale}
+        pathAfterLocale={pathAfterLocale}
+        alternates={langSwitcherAlternates}
+      />
     </nav>
   </div>
 </header>

@@ -1,0 +1,134 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import RedirectShell from "../../../components/RedirectShell.astro";
+import { fetchLangHrefAlternates, englishSourceId } from "../../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import { googleCalendarTemplateUrl } from "../../../lib/events/googleCalendar";
+import { getSanityClient } from "../../../lib/sanity/client";
+import { allEventPathRows, eventBySlugAndLocale } from "../../../lib/sanity/queries";
+import { richTextToHtml } from "../../../lib/sanity/portableText";
+import { buildTranslatableSlugPaths } from "../../../lib/i18n/staticPaths";
+
+export async function getStaticPaths() {
+  const client = getSanityClient();
+  const rows = await client.fetch(allEventPathRows);
+  const paths = buildTranslatableSlugPaths(
+    rows,
+    publishedLocales,
+    "en",
+    (loc, s) => withLocalePath(loc, `events/${s}`),
+  );
+  return paths.map((p) => ({ params: p.params, props: p.props }));
+}
+
+const locale = Astro.params.locale as SupportedLocale;
+const slug = Astro.params.slug as string;
+
+if (!supportedLocales.includes(locale) || !slug) {
+  return new Response(null, { status: 404 });
+}
+
+const mode = Astro.props.mode as "content" | "redirect";
+const redirectTo = Astro.props.redirectTo as string | undefined;
+const showRedirect = mode === "redirect" && Boolean(redirectTo);
+
+const client = getSanityClient();
+const event = showRedirect
+  ? null
+  : await client.fetch<{
+      _id: string;
+      locale: string;
+      title: string;
+      slug: string;
+      startDateTime: string;
+      endDateTime: string;
+      timezone: string;
+      location?: string | null;
+      mapLink?: string | null;
+      joinUrl?: string | null;
+      description: unknown;
+      translationOf?: { _id: string } | null;
+    }>(eventBySlugAndLocale, { locale, slug });
+
+if (!showRedirect && !event) {
+  return new Response(null, { status: 404 });
+}
+
+const bodyHtml = event ? richTextToHtml(event.description as never) : "";
+const enId = event ? englishSourceId(event) : "";
+const langSwitcherAlternates = event
+  ? await fetchLangHrefAlternates(
+      client,
+      "event",
+      enId,
+      (loc, s) => withLocalePath(loc, `events/${s}`),
+      publishedLocales,
+    )
+  : {};
+const pathAfterLocale = event ? `events/${event.slug}` : `events/${slug}`;
+
+const gcal = event
+  ? googleCalendarTemplateUrl({
+      title: event.title,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
+      location: event.location,
+      joinUrl: event.joinUrl,
+      description: event.description,
+    })
+  : "";
+
+const icsHref = `/calendar/${locale}/${slug}.ics`;
+
+function formatRange(startIso: string, endIso: string, tz: string, loc: string) {
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  const dOpts: Intl.DateTimeFormatOptions = { dateStyle: "full", timeStyle: "short", timeZone: tz };
+  return `${new Intl.DateTimeFormat(loc, dOpts).format(start)} – ${new Intl.DateTimeFormat(loc, dOpts).format(end)}`;
+}
+---
+
+{
+  showRedirect ? (
+    <RedirectShell to={redirectTo!} />
+  ) : (
+    <BaseLayout
+      title={event!.title}
+      locale={locale}
+      langSwitcherAlternates={langSwitcherAlternates}
+      pathAfterLocale={pathAfterLocale}
+    >
+      <article>
+        <h1>{event!.title}</h1>
+        <p style="color: var(--color-text-muted);">
+          {formatRange(event!.startDateTime, event!.endDateTime, event!.timezone, locale)}
+        </p>
+        <p style="margin: var(--space-4) 0; display: flex; flex-wrap: wrap; gap: var(--space-3);">
+          <a class="btn btn--primary" href={icsHref} download>
+            Add to calendar (.ics)
+          </a>
+          <a class="btn btn--primary" href={gcal} rel="noopener noreferrer" target="_blank">
+            Google Calendar
+          </a>
+          {event!.mapLink ? (
+            <a class="btn btn--primary" href={event!.mapLink} rel="noopener noreferrer" target="_blank">
+              Map
+            </a>
+          ) : null}
+          {event!.joinUrl ? (
+            <a class="btn btn--primary" href={event!.joinUrl} rel="noopener noreferrer" target="_blank">
+              Join online
+            </a>
+          ) : null}
+        </p>
+        {event!.location ? (
+          <p>
+            <strong>Location:</strong> {event!.location}
+          </p>
+        ) : null}
+        <div class="prose" set:html={bodyHtml} />
+      </article>
+    </BaseLayout>
+  )
+}

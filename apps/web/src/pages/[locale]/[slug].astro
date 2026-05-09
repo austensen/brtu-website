@@ -1,0 +1,179 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import RedirectShell from "../../components/RedirectShell.astro";
+import { fetchLangHrefAlternates, englishSourceId } from "../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales, withLocalePath } from "../../lib/i18n/locales";
+import { getSanityClient } from "../../lib/sanity/client";
+import { allMarketingPagePathRows, marketingPageBySlugAndLocale } from "../../lib/sanity/queries";
+import { richTextToHtml } from "../../lib/sanity/portableText";
+import { buildTranslatableSlugPaths } from "../../lib/i18n/staticPaths";
+
+type ContactForm = {
+  formName: string;
+  nameLabel: string;
+  emailLabel: string;
+  messageLabel: string;
+  submitLabel: string;
+  successMessage: string;
+  errorMessage: string;
+};
+
+export async function getStaticPaths() {
+  const client = getSanityClient();
+  const rows = await client.fetch(allMarketingPagePathRows);
+  const paths = buildTranslatableSlugPaths(
+    rows,
+    publishedLocales,
+    "en",
+    (loc, slug) => withLocalePath(loc, slug),
+  );
+  return paths.map((p) => ({ params: p.params, props: p.props }));
+}
+
+const locale = Astro.params.locale as SupportedLocale;
+const slug = Astro.params.slug as string;
+
+if (!supportedLocales.includes(locale) || !slug) {
+  return new Response(null, { status: 404 });
+}
+
+const mode = Astro.props.mode as "content" | "redirect";
+const redirectTo = Astro.props.redirectTo as string | undefined;
+const showRedirect = mode === "redirect" && Boolean(redirectTo);
+
+const client = getSanityClient();
+const page = showRedirect
+  ? null
+  : await client.fetch<{
+      _id: string;
+      locale: string;
+      title: string;
+      pageType: string;
+      slug: string;
+      body: unknown;
+      contactEmail?: string;
+      contactForm?: ContactForm;
+      translationOf?: { _id: string } | null;
+    }>(marketingPageBySlugAndLocale, { locale, slug });
+
+if (!showRedirect && (!page || page.pageType === "home")) {
+  return new Response(null, { status: 404 });
+}
+
+const bodyHtml = page ? richTextToHtml(page.body as never) : "";
+const enId = page ? englishSourceId(page) : "";
+const langSwitcherAlternates = page
+  ? await fetchLangHrefAlternates(
+      client,
+      "page",
+      enId,
+      (loc, s) => withLocalePath(loc, s),
+      publishedLocales,
+    )
+  : {};
+const pathAfterLocale = page?.slug ?? slug;
+const sent = Astro.url.searchParams.get("sent") === "1";
+---
+
+{
+  showRedirect ? (
+    <RedirectShell to={redirectTo!} />
+  ) : (
+    <BaseLayout
+      title={page!.title}
+      locale={locale}
+      langSwitcherAlternates={langSwitcherAlternates}
+      pathAfterLocale={pathAfterLocale}
+    >
+      <h1>{page!.title}</h1>
+      <div class="prose" set:html={bodyHtml} />
+
+      {page!.pageType === "contact" && page!.contactEmail ? (
+        <p style="margin-top: var(--space-6);">
+          <a class="btn btn--primary" href={`mailto:${page!.contactEmail}`}>
+            {page!.contactForm?.emailLabel}
+          </a>
+        </p>
+      ) : null}
+
+      {page!.pageType === "contact" && page!.contactForm ? (
+        <section
+          class="card"
+          style="margin-top: var(--space-6); max-width: 40rem;"
+          aria-labelledby="contact-form-heading"
+        >
+          <p id="contact-form-heading" class="visually-hidden">
+            {page!.contactForm.nameLabel}
+          </p>
+          {sent ? (
+            <p role="status">{page!.contactForm.successMessage}</p>
+          ) : (
+            <form
+              name={page!.contactForm.formName}
+              method="POST"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+              action={`${withLocalePath(locale, page!.slug)}?sent=1`}
+              aria-describedby="contact-form-errors"
+            >
+              <input type="hidden" name="form-name" value={page!.contactForm.formName} />
+              <p class="visually-hidden">
+                <label>
+                  Don’t fill this out if you’re human:
+                  <input name="bot-field" />
+                </label>
+              </p>
+              <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                <label>
+                  <span style="display: block; font-weight: 600; margin-bottom: var(--space-2);">
+                    {page!.contactForm.nameLabel}
+                  </span>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    autocomplete="name"
+                    style="width: 100%; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius); font: inherit;"
+                  />
+                </label>
+                <label>
+                  <span style="display: block; font-weight: 600; margin-bottom: var(--space-2);">
+                    {page!.contactForm.emailLabel}
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    style="width: 100%; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius); font: inherit;"
+                  />
+                </label>
+                <label>
+                  <span style="display: block; font-weight: 600; margin-bottom: var(--space-2);">
+                    {page!.contactForm.messageLabel}
+                  </span>
+                  <textarea
+                    name="message"
+                    required
+                    rows={6}
+                    style="width: 100%; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius); font: inherit;"
+                  />
+                </label>
+                <button type="submit" class="btn btn--primary">
+                  {page!.contactForm.submitLabel}
+                </button>
+              </div>
+            </form>
+          )}
+          <p
+            id="contact-form-errors"
+            style="margin-top: var(--space-4); font-size: 0.9rem; color: var(--color-text-muted);"
+          >
+            {page!.contactForm.errorMessage}
+          </p>
+        </section>
+      ) : null}
+    </BaseLayout>
+  )
+}

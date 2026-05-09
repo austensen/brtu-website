@@ -1,0 +1,103 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import { getSanityClient } from "../../../lib/sanity/client";
+import { pastEventsByLocale, upcomingEventsByLocale } from "../../../lib/sanity/queries";
+
+export async function getStaticPaths() {
+  return publishedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as SupportedLocale;
+if (!supportedLocales.includes(locale)) {
+  return new Response(null, { status: 404 });
+}
+
+const now = new Date().toISOString();
+const client = getSanityClient();
+const upcoming = await client.fetch<
+  Array<{
+    title: string;
+    slug: string;
+    startDateTime: string;
+    endDateTime: string;
+    timezone: string;
+  }>
+>(upcomingEventsByLocale, { locale, now });
+
+const past = await client.fetch<
+  Array<{
+    title: string;
+    slug: string;
+    startDateTime: string;
+    endDateTime: string;
+    timezone: string;
+  }>
+>(pastEventsByLocale, { locale, now });
+
+const langSwitcherAlternates = Object.fromEntries(
+  publishedLocales.map((l) => [l, withLocalePath(l, "events")]),
+) as LangHrefMap;
+
+function formatRange(startIso: string, endIso: string, tz: string, loc: string) {
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  const dOpts: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short", timeZone: tz };
+  return `${new Intl.DateTimeFormat(loc, dOpts).format(start)} – ${new Intl.DateTimeFormat(loc, dOpts).format(end)}`;
+}
+---
+
+<BaseLayout
+  title="Events"
+  locale={locale}
+  langSwitcherAlternates={langSwitcherAlternates}
+  pathAfterLocale="events"
+>
+  <h1>Events</h1>
+
+  <section aria-labelledby="upcoming-heading" style="margin-top: var(--space-8);">
+    <h2 id="upcoming-heading">Upcoming</h2>
+    {
+      upcoming.length === 0 ? (
+        <p style="color: var(--color-text-muted);">No upcoming events.</p>
+      ) : (
+        <ul style="list-style: none; padding: 0; margin: var(--space-4) 0 0;">
+          {upcoming.map((ev) => (
+            <li class="card" style="margin-bottom: var(--space-4);">
+              <h3 style="margin: 0 0 var(--space-2); font-size: 1.15rem;">
+                <a href={withLocalePath(locale, `events/${ev.slug}`)}>{ev.title}</a>
+              </h3>
+              <p style="margin: 0; color: var(--color-text-muted); font-size: 0.95rem;">
+                {formatRange(ev.startDateTime, ev.endDateTime, ev.timezone, locale)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  <section aria-labelledby="past-heading" style="margin-top: var(--space-10);">
+    <h2 id="past-heading">Past</h2>
+    {
+      past.length === 0 ? (
+        <p style="color: var(--color-text-muted);">No past events.</p>
+      ) : (
+        <ul style="list-style: none; padding: 0; margin: var(--space-4) 0 0;">
+          {past.map((ev) => (
+            <li class="card" style="margin-bottom: var(--space-4);">
+              <h3 style="margin: 0 0 var(--space-2); font-size: 1.15rem;">
+                <a href={withLocalePath(locale, `events/${ev.slug}`)}>{ev.title}</a>
+              </h3>
+              <p style="margin: 0; color: var(--color-text-muted); font-size: 0.95rem;">
+                {formatRange(ev.startDateTime, ev.endDateTime, ev.timezone, locale)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</BaseLayout>

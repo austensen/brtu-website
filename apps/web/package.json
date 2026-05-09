@@ -4,11 +4,18 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "tsx scripts/generate-event-ics.ts && astro build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@brtu/locales": "*",
-    "astro": "^5.0.0"
+    "@portabletext/to-html": "^2.0.17",
+    "@sanity/client": "^7.22.0",
+    "@sanity/image-url": "^1.2.0",
+    "astro": "^5.0.0",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }

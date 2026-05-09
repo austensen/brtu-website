@@ -1,26 +1,30 @@
 ---
 import { publishedLocales, type SupportedLocale } from "../lib/i18n/locales";
+import type { LangHrefMap } from "../lib/i18n/langAlternates";
 
 type Props = {
   currentLocale: SupportedLocale;
   pathAfterLocale?: string;
+  /** Full paths like `/en/blog/slug` when slugs differ per locale. */
+  alternates?: LangHrefMap;
 };
 
-const { currentLocale, pathAfterLocale = "" } = Astro.props;
-const targetPath = (locale: SupportedLocale) => `/${locale}/${pathAfterLocale}`.replace(/\/+$/, "/");
+const { currentLocale, pathAfterLocale = "", alternates } = Astro.props;
+const fallbackPath = (locale: SupportedLocale) =>
+  `/${locale}/${pathAfterLocale}`.replace(/\/+$/, "/");
 ---
 
 <ul class="lang-switcher" aria-label="Language">
   {
-    publishedLocales.map((locale) => (
-      <li>
-        <a
-          href={targetPath(locale)}
-          aria-current={locale === currentLocale ? "page" : undefined}
-        >
-          {locale.toUpperCase()}
-        </a>
-      </li>
-    ))
+    publishedLocales.map((locale) => {
+      const href = alternates?.[locale] ?? fallbackPath(locale);
+      return (
+        <li>
+          <a href={href} aria-current={locale === currentLocale ? "page" : undefined}>
+            {locale.toUpperCase()}
+          </a>
+        </li>
+      );
+    })
   }
 </ul>

@@ -201,10 +201,10 @@ Use statuses: `not started`, `planning`, `in progress`, `done`, `blocked`.
 - `WS-C` Sanity content model (schemas) — `done`
 - `WS-D` Studio desk structure and editor guardrails — `done`
 - `WS-E` Design system, global chrome, accessibility — `done`
-- `WS-F` Marketing pages (Home, About, Contact) — `not started`
-- `WS-G` Blog/news — `not started`
-- `WS-H` Resources library — `not started`
-- `WS-I` Events — `not started`
+- `WS-F` Marketing pages (Home, About, Contact) — `done`
+- `WS-G` Blog/news — `done`
+- `WS-H` Resources library — `done`
+- `WS-I` Events — `done`
 - `WS-J` Deploy, CI/CD, webhooks, operations — `done`
 - `WS-K` Editor handbook, training, launch QA — `not started`
 
@@ -898,15 +898,40 @@ Next workstreams:
 
 ### follow-up dependencies
 
-- `WS-K`: include final webhook verification screenshots/steps in launch QA checklist.
-- `WS-F`: ensure Studio/editor docs and frontend behavior match the deployed routing/schema/env contracts (WS-D/E now align Studio + `BaseLayout`).
+- `WS-K`: include final webhook verification screenshots/steps in launch QA checklist; document Netlify form `?sent=1` redirect behavior and `PUBLIC_SITE_URL` for ICS URLs.
 
-## Next-agent context packet (post WS-D / WS-E)
+## Workstream completion note (WS-F through WS-I)
+
+### what shipped
+
+- Dynamic locale routes under `apps/web/src/pages/[locale]/` (home, marketing `[slug]` for about/contact, blog list + pagination + post detail, resources list + detail with client-side category filter, events list + detail).
+- Sanity runtime: `getSanityClient()` + `resolveSanityEnv()` (loads root `apps/web` `.env` and monorepo `.env`; accepts `PUBLIC_SANITY_*` or `SANITY_*`), `@sanity/image-url`, `@portabletext/to-html` for `.prose` HTML.
+- Translation fallbacks: `buildTranslatableSlugPaths` + `RedirectShell` for silent English redirects; `fetchLangHrefAlternates` / `fetchHomeLangHrefAlternates` for the language switcher.
+- Contact: Netlify form fields and messages only from `contactFormConfig`; `action` posts to `?sent=1` for success messaging.
+- Events: Google Calendar template link; build-time ICS via `tsx scripts/generate-event-ics.ts` → `public/calendar/[locale]/[slug].ics` (URLs `/calendar/.../....ics`). **`PUBLIC_SITE_URL`** in env for absolute links inside ICS.
+- Blog pagination: **10** posts per page; `/[locale]/blog/page/[n]` for `n >= 2`.
+- Nav: Header/Footer use CMS slugs for about/contact (defaults `about` / `contact`).
+
+### files touched (high level)
+
+- `apps/web/src/lib/sanity/*`, `apps/web/src/lib/i18n/staticPaths.ts`, `langAlternates.ts`
+- `apps/web/src/pages/[locale]/**`, removed `pages/en/index.astro`
+- `apps/web/scripts/generate-event-ics.ts`, `apps/web/package.json` (`build` runs ICS then Astro)
+- `apps/web/astro.config.mjs` (site URL from env), `apps/web/.env.example`, `apps/web/src/env.d.ts`
+- `apps/web/src/components/{Header,Footer,LanguageSwitcher,RedirectShell}.astro`, `BaseLayout.astro`, `global.css`
+- `apps/web/src/lib/sanity/queries.ts` (extra GROQ for nav, paths, pagination, events, ICS)
+
+### deviations / follow-ups
+
+- Section titles like “Blog”, “Resources”, “Events”, and a few CTA strings (e.g. download, calendar buttons) are English UI labels not yet driven from Sanity.
+- Netlify must successfully redirect after form POST to the `?sent=1` URL for the success message pattern; verify on first deploy.
+
+## Next-agent context packet (post WS-F–I)
 
 Use this packet at the top of the next session:
 
 ```md
-Workstream handoff: WS-A through WS-E and WS-J implemented; WS-F–I are next (parallel).
+Workstream handoff: WS-A through WS-J and WS-F–I implemented; **WS-K** (editor handbook + launch QA) is next.
 
 Source of truth:
 
@@ -914,32 +939,18 @@ Source of truth:
 
 Completed:
 
-- WS-A foundation/tooling baseline
-- WS-B i18n routing skeleton (`/en/...` canonical, locale helpers, language switcher)
-- WS-C Sanity MVP schemas + locale + `translationOf` + validations
-- WS-J deploy/env docs + scripts + CORS baseline
-- WS-D Studio desk structure + non-blocking editor checklist action + shared `@brtu/locales` (no duplicated locale lists in schemas)
-- WS-E brand tokens + logo + `BaseLayout` (lang/dir, skip link, header/footer) + `global.css` a11y/motion baseline + `apps/web/src/lib/sanity/queries.ts` for F–I
+- WS-F–I: marketing pages, blog (10/post page), resources (filter), events (ICS + Google Calendar), Sanity-backed `BaseLayout` nav slugs, translation redirects + language switcher alternates.
 
 Important constraints to preserve:
 
-- Locale-prefixed canonical URLs remain required
-- Locale lists: import from `@brtu/locales` (`localeOptionsForSanity()` in Studio; web via `apps/web/src/lib/i18n/locales.ts` and `publishedLocales`)
-- Sanity translation linkage: `locale` + `translationOf` (English source)
-- Contact page: all form copy from `contactFormConfig` (no hardcoded labels in UI)
-- Deployment/scripts: root ↔ app command parity (`docs/ws-j-deploy-ci-env.md`)
-- Studio: Sanity 3.x — Vision plugin not bundled (peer mismatch with current `@sanity/vision` 5.x)
-
-Recommended next workstreams:
-
-- WS-F, WS-G, WS-H, WS-I in parallel: marketing pages, blog, resources, events — each uses `BaseLayout`, GROQ from `apps/web/src/lib/sanity/queries.ts`, and WS-B fallback rules for missing translations
+- Locale-prefixed canonical URLs; `publishedLocales` in `apps/web/src/lib/i18n/locales.ts`
+- Contact form copy only from `contactFormConfig`
+- ICS path: `/calendar/[locale]/[slug].ics`; set `PUBLIC_SITE_URL` for production
+- Root `npm run build` / `build:web` per `docs/ws-j-deploy-ci-env.md`
 
 Read first:
 
-- .cursor/plans/tenant_union_website_plan_81e09108.plan.md (status tracker + WS-D/E completion notes)
-- apps/web/src/layouts/BaseLayout.astro
-- apps/web/src/lib/sanity/queries.ts
-- apps/web/src/lib/i18n/locales.ts (`publishedLocales` strategy)
-- apps/studio/schemas/index.ts
-- docs/ws-j-deploy-ci-env.md
+- `.cursor/plans/tenant_union_website_plan_81e09108.plan.md` (tracker + WS-F–I completion note)
+- `docs/ws-j-deploy-ci-env.md`
+- `apps/web/src/lib/sanity/client.ts`, `apps/web/src/lib/sanity/queries.ts`
 ```

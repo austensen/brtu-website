@@ -1,0 +1,83 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { POSTS_PER_PAGE } from "../../../lib/blog/constants";
+import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import { urlForSanityImage } from "../../../lib/sanity/image";
+import { getSanityClient } from "../../../lib/sanity/client";
+import { postCountByLocale, postsByLocaleSlice } from "../../../lib/sanity/queries";
+
+export async function getStaticPaths() {
+  return publishedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as SupportedLocale;
+if (!supportedLocales.includes(locale)) {
+  return new Response(null, { status: 404 });
+}
+
+const client = getSanityClient();
+const total = await client.fetch<number>(postCountByLocale, { locale });
+const posts = await client.fetch<
+  Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    publishedAt: string;
+    heroImage?: { asset?: unknown; alt?: string | null };
+    translationOf?: { _id: string } | null;
+  }>
+>(postsByLocaleSlice, { locale, start: 0, end: POSTS_PER_PAGE });
+
+const langSwitcherAlternates = Object.fromEntries(
+  publishedLocales.map((l) => [l, withLocalePath(l, "blog")]),
+) as LangHrefMap;
+
+const totalPages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+---
+
+<BaseLayout
+  title="Blog"
+  locale={locale}
+  langSwitcherAlternates={langSwitcherAlternates}
+  pathAfterLocale="blog"
+>
+  <h1>Blog</h1>
+  <ul style="list-style: none; padding: 0; margin: var(--space-6) 0 0;">
+    {
+      posts.map((post) => {
+        const img = post.heroImage?.asset
+          ? urlForSanityImage(post.heroImage as never)?.width(800).url()
+          : null;
+        const heroAlt = post.heroImage?.alt?.trim() || "";
+        return (
+          <li class="card" style="margin-bottom: var(--space-4);">
+            {img ? (
+              <a href={withLocalePath(locale, `blog/${post.slug}`)} style="display: block; margin-bottom: var(--space-3);">
+                <img src={img} alt={heroAlt} width="800" height="450" style="width: 100%; height: auto; border-radius: var(--radius);" loading="lazy" decoding="async" />
+              </a>
+            ) : null}
+            <h2 style="margin: 0 0 var(--space-2); font-size: 1.25rem;">
+              <a href={withLocalePath(locale, `blog/${post.slug}`)}>{post.title}</a>
+            </h2>
+            <time datetime={post.publishedAt} style="color: var(--color-text-muted); font-size: 0.9rem;">
+              {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(post.publishedAt))}
+            </time>
+          </li>
+        );
+      })
+    }
+  </ul>
+
+  {
+    totalPages > 1 ? (
+      <nav aria-label="Blog pagination" style="margin-top: var(--space-8);">
+        <p style="margin: 0 0 var(--space-2); font-weight: 600;">
+          Page 1 of {totalPages}
+        </p>
+        <a href={withLocalePath(locale, "blog/page/2")}>Older posts</a>
+      </nav>
+    ) : null
+  }
+</BaseLayout>

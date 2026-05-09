@@ -6,17 +6,30 @@
 import { isRtlLocale, type SupportedLocale } from "@brtu/locales";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import type { LangHrefMap } from "../lib/i18n/langAlternates";
+import { getSanityClient } from "../lib/sanity/client";
+import { marketingNavSlugsByLocale } from "../lib/sanity/queries";
 import "../styles/global.css";
 
 type Props = {
   title: string;
   locale: SupportedLocale;
   description?: string;
+  langSwitcherAlternates?: LangHrefMap;
+  pathAfterLocale?: string;
 };
 
-const { title, locale, description } = Astro.props;
+const { title, locale, description, langSwitcherAlternates, pathAfterLocale } = Astro.props;
 const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 const orgName = "Bay Ridge Tenant Union";
+
+const client = getSanityClient();
+const navRows = await client.fetch<Array<{ pageType: string; slug: string }>>(
+  marketingNavSlugsByLocale,
+  { locale },
+);
+const aboutSlug = navRows.find((r) => r.pageType === "about")?.slug ?? "about";
+const contactSlug = navRows.find((r) => r.pageType === "contact")?.slug ?? "contact";
 ---
 
 <!doctype html>
@@ -30,10 +43,17 @@ const orgName = "Bay Ridge Tenant Union";
   </head>
   <body class="layout-shell">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <Header locale={locale} organizationName={orgName} />
+    <Header
+      locale={locale}
+      organizationName={orgName}
+      aboutSlug={aboutSlug}
+      contactSlug={contactSlug}
+      langSwitcherAlternates={langSwitcherAlternates}
+      pathAfterLocale={pathAfterLocale}
+    />
     <main id="main-content" class="layout-main" tabindex="-1">
       <slot />
     </main>
-    <Footer organizationName={orgName} />
+    <Footer organizationName={orgName} locale={locale} aboutSlug={aboutSlug} contactSlug={contactSlug} />
   </body>
 </html>
