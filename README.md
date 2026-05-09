@@ -54,3 +54,6 @@ Local development uses a single root `.env` file (never committed). Deployment/C
 
 - WS-A foundation contract: `docs/ws-a-foundation-contract.md`
 - WS-J deploy/CI/env wiring: `docs/ws-j-deploy-ci-env.md`
+- Editor handbook (publishing, translations, contact form, events): `docs/editor-handbook.md`
+- Launch QA checklist: `docs/launch-qa-checklist.md`
+- Phase 2 backlog triage: `docs/phase2-backlog.md`

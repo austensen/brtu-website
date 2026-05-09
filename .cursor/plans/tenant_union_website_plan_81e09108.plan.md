@@ -206,7 +206,7 @@ Use statuses: `not started`, `planning`, `in progress`, `done`, `blocked`.
 - `WS-H` Resources library — `done`
 - `WS-I` Events — `done`
 - `WS-J` Deploy, CI/CD, webhooks, operations — `done`
-- `WS-K` Editor handbook, training, launch QA — `not started`
+- `WS-K` Editor handbook, training, launch QA — `done`
 
 **Dependency sketch**
 
@@ -926,31 +926,58 @@ Next workstreams:
 - Section titles like “Blog”, “Resources”, “Events”, and a few CTA strings (e.g. download, calendar buttons) are English UI labels not yet driven from Sanity.
 - Netlify must successfully redirect after form POST to the `?sent=1` URL for the success message pattern; verify on first deploy.
 
-## Next-agent context packet (post WS-F–I)
+## Workstream completion note (WS-K)
 
-Use this packet at the top of the next session:
+### what shipped
+
+- **Editor handbook** (`docs/editor-handbook.md`): Studio desk tour, paraphrased Editor checklist by type, locales/`translationOf` behavior, silent English redirect explanation, `publishedLocales` developer note, pages/blog/resources/events guidance, Netlify contact form (`?sent=1`, honeypot) plus **Google Form** editorial alternatives (not code-wired), ICS URL pattern and `PUBLIC_SITE_URL`, publishing/webhook pointer to WS-J, optional screenshot capture list, break-glass contact **template** (no PII).
+- **Launch QA checklist** (`docs/launch-qa-checklist.md`): root `lint` / `typecheck` / `build`, Netlify env table, CORS + webhook verification with screenshot note, smoke URLs (contact form success path, `.ics`, pagination, switcher), i18n spot-check, light a11y/Lighthouse, sign-off block.
+- **Phase 2 backlog triage** (`docs/phase2-backlog.md`): Next / Later / Cut from master plan Phase 2 and deferred `N`/`U` items plus WS-F–I UI-chrome follow-up.
+- **README** links to the three docs above.
+
+### files touched
+
+- `docs/editor-handbook.md`, `docs/launch-qa-checklist.md`, `docs/phase2-backlog.md`
+- `README.md`
+- `.cursor/plans/tenant_union_website_plan_81e09108.plan.md` (tracker, this note, post-MVP context packet)
+
+### deviations from plan
+
+- **Screenshots**: handbook uses a numbered “Screenshots to capture” list rather than committing binary assets to git (MVP-friendly).
+
+### new constraints
+
+- When **schema** or **`editorChecklistAction`** copy changes, update `docs/editor-handbook.md` (and launch smoke URLs if routes change).
+- **`docs/ws-j-deploy-ci-env.md`** remains the technical deploy source of truth; handbook links to it.
+
+### follow-up dependencies
+
+- **Phase 2**: implement from `docs/phase2-backlog.md` based on post-launch feedback.
+- **Launch QA execution**: run `docs/launch-qa-checklist.md` on real production (webhook screenshot, form `?sent=1` verification) when go-live is scheduled.
+
+## Next-agent context packet (post-MVP)
+
+Use this packet when planning **Phase 2** or maintenance work:
 
 ```md
-Workstream handoff: WS-A through WS-J and WS-F–I implemented; **WS-K** (editor handbook + launch QA) is next.
+MVP workstreams WS-A through WS-K are complete.
 
 Source of truth:
 
 - .cursor/plans/tenant_union_website_plan_81e09108.plan.md
+- docs/phase2-backlog.md (prioritized deferred items)
+- docs/editor-handbook.md (keep in sync with Studio UX / schema)
+- docs/ws-j-deploy-ci-env.md (deploy + env)
 
-Completed:
+Preserve:
 
-- WS-F–I: marketing pages, blog (10/post page), resources (filter), events (ICS + Google Calendar), Sanity-backed `BaseLayout` nav slugs, translation redirects + language switcher alternates.
+- Locale-prefixed URLs; `publishedLocales` in `apps/web/src/lib/i18n/locales.ts`
+- Contact form copy from CMS `contactForm` / `contactFormConfig` pattern
+- ICS: `/calendar/[locale]/[slug].ics`; `PUBLIC_SITE_URL` in production
+- Root `npm run build` / Netlify `npm run build:web` per `docs/ws-j-deploy-ci-env.md`
 
-Important constraints to preserve:
+Unresolved / deferred examples:
 
-- Locale-prefixed canonical URLs; `publishedLocales` in `apps/web/src/lib/i18n/locales.ts`
-- Contact form copy only from `contactFormConfig`
-- ICS path: `/calendar/[locale]/[slug].ics`; set `PUBLIC_SITE_URL` for production
-- Root `npm run build` / `build:web` per `docs/ws-j-deploy-ci-env.md`
-
-Read first:
-
-- `.cursor/plans/tenant_union_website_plan_81e09108.plan.md` (tracker + WS-F–I completion note)
-- `docs/ws-j-deploy-ci-env.md`
-- `apps/web/src/lib/sanity/client.ts`, `apps/web/src/lib/sanity/queries.ts`
+- Sitewide search (Phase 2)
+- SEO fields, OG, schema.org, newsletter, analytics (see phase2 backlog)
 ```
