@@ -38,7 +38,13 @@ export function getSanityClient(): SanityClient {
     if (!projectId || !dataset) {
       throw new Error("Missing PUBLIC_SANITY_PROJECT_ID or PUBLIC_SANITY_DATASET (or SANITY_* in root .env)");
     }
-    client = createClient({ projectId, dataset, apiVersion, useCdn: true });
+    // In dev, disable CDN so newly published documents show up immediately (CDN is eventually consistent).
+    client = createClient({
+      projectId,
+      dataset,
+      apiVersion,
+      useCdn: import.meta.env.PROD,
+    });
   }
   return client;
 }

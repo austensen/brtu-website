@@ -48,7 +48,13 @@ const langSwitcherAlternates = Object.fromEntries(
   <div class="resource-toolbar" data-resource-filter style="margin: var(--space-6) 0;">
     <span id="filter-label" class="visually-hidden">Filter by category</span>
     <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);" role="group" aria-labelledby="filter-label">
-      <button type="button" class="btn btn--primary" data-cat="all" style="border: 2px solid var(--color-border); background: var(--color-bg); color: var(--color-text);">
+      <button
+        type="button"
+        class="btn btn--primary"
+        data-cat="__all__"
+        aria-pressed="true"
+        style="border: 2px solid var(--color-border); background: var(--color-bg); color: var(--color-text);"
+      >
         All
       </button>
       {
@@ -108,7 +114,7 @@ const langSwitcherAlternates = Object.fromEntries(
           });
           items.forEach((li) => {
             const slug = li.getAttribute("data-category") || "";
-            const show = cat === "all" || slug === cat;
+            const show = cat === "__all__" || slug === cat;
             li.style.display = show ? "" : "none";
           });
         });
