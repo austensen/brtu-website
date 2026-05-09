@@ -10,7 +10,7 @@ function checklistForType(schemaType: string): string[] {
   switch (schemaType) {
     case "page":
       return [
-        "Title and slug match what should appear on the public site.",
+        "Home: lives at /[locale]/ only (no slug in Studio). About/Contact: title and slug match the public URL.",
         "Contact pages: confirm email and Netlify form labels/messages are complete.",
         ...common,
       ];

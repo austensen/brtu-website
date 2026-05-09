@@ -51,12 +51,21 @@ export const page = defineType({
     defineField({
       name: "slug",
       title: "Slug",
-      description: "URL segment for this locale (e.g. about, contact).",
+      description:
+        "URL segment for About and Contact (e.g. about, contact). Home uses the locale root only — /en/, /es/, etc. — so no slug is needed.",
       type: "slug",
       options: {
         source: "title",
       },
-      validation: (rule) => rule.required(),
+      hidden: ({ document }) => document?.pageType === "home",
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          if (context.document?.pageType === "home") return true;
+          if (!value?.current?.trim()) {
+            return "Slug is required for About and Contact pages.";
+          }
+          return true;
+        }),
     }),
     defineField({
       name: "body",

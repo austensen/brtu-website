@@ -77,10 +77,10 @@ The public site only builds routes and language-switcher entries for locales lis
 
 ## Pages (Home, About, Contact)
 
-- **Slug** becomes part of the URL after the locale (for example `/en/about`).
-- **About** and **Contact** slugs also feed the main navigation (defaults are often `about` and `contact` — confirm in your CMS entries).
+- **Home** is served at the locale root only (`/en/`, `/es/`, …). In Studio the **Slug** field is hidden for Home — you do not set one.
+- **About** and **Contact**: **Slug** becomes part of the URL after the locale (for example `/en/about`). Those slugs also feed the main navigation (defaults are often `about` and `contact` — confirm in your CMS entries).
 
-**Home** is a special page type; do not treat it like a normal `/slug` marketing page when training new editors.
+**Home** is still a special page type in the desk (under **Pages → Home pages**); it is not edited like a `/slug` marketing page.
 
 ## Contact page
 
