@@ -1,12 +1,12 @@
 ---
 import type { SupportedLocale } from "@brtu/locales";
+import ResourceDetail from "../../../components/ResourceDetail.tsx";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import RedirectShell from "../../../components/RedirectShell.astro";
 import { fetchLangHrefAlternates, englishSourceId } from "../../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
 import { getSanityClient } from "../../../lib/sanity/client";
 import { allResourcePathRows, resourceBySlugAndLocale } from "../../../lib/sanity/queries";
-import { richTextToHtml } from "../../../lib/sanity/portableText";
 import { buildTranslatableSlugPaths } from "../../../lib/i18n/staticPaths";
 
 export async function getStaticPaths() {
@@ -78,35 +78,16 @@ const fileName = resource?.file?.asset?.originalFilename ?? "download";
       langSwitcherAlternates={langSwitcherAlternates}
       pathAfterLocale={pathAfterLocale}
     >
-      <article>
-        <h1>{resource!.title}</h1>
-        {resource!.category ? (
-          <p style="color: var(--color-text-muted); margin-top: calc(-1 * var(--space-2));">
-            {resource!.category.title}
-          </p>
-        ) : null}
-        <p style="font-size: 0.95rem; color: var(--color-text-muted);">
-          Updated{" "}
-          <time datetime={resource!.updatedAt}>
-            {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(resource!.updatedAt))}
-          </time>
-        </p>
-        <p class="prose" style="margin-top: var(--space-4);">
-          {resource!.summary}
-        </p>
-        <p style="margin-top: var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-4);">
-          {fileUrl ? (
-            <a class="btn btn--primary" href={fileUrl} download={fileName}>
-              Download
-            </a>
-          ) : null}
-          {resource!.externalUrl ? (
-            <a class="btn btn--primary" href={resource!.externalUrl} rel="noopener noreferrer">
-              External link
-            </a>
-          ) : null}
-        </p>
-      </article>
+      <ResourceDetail
+        locale={locale}
+        title={resource!.title}
+        categoryTitle={resource!.category?.title}
+        updatedAt={resource!.updatedAt}
+        summary={resource!.summary}
+        fileUrl={fileUrl}
+        fileName={fileName}
+        externalUrl={resource!.externalUrl}
+      />
     </BaseLayout>
   )
 }
