@@ -131,6 +131,8 @@ Switching to Google Forms requires a **developer** to change the Astro template;
 
   For correct absolute links inside ICS files, production must set **`PUBLIC_SITE_URL`** (see [`docs/ws-j-deploy-ci-env.md`](ws-j-deploy-ci-env.md)).
 
+  **Local preview:** the dev server does not generate `.ics` files automatically. Developers can run `npx tsx scripts/generate-event-ics.ts` from `apps/web` with the same Sanity-related `.env` values as the web app, or expect those URLs to 404 until a full `npm run build` (see [`docs/ws-j-deploy-ci-env.md`](ws-j-deploy-ci-env.md)).
+
 ## Publishing: from draft to live
 
 1. **Draft** in Studio until ready.

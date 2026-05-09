@@ -22,12 +22,32 @@ The `apps/web` build runs `tsx scripts/generate-event-ics.ts` before `astro buil
 
 ## Studio deployment (Sanity hosted)
 
-1. From `apps/studio`, run:
-   - `npm run deploy:studio`
-2. Configure Studio env vars in the deployment target:
-   - `SANITY_PROJECT_ID`
-   - `SANITY_DATASET`
-   - `SANITY_API_VERSION` (optional)
+Deploy from the repo root with:
+
+```bash
+npm run deploy:studio
+```
+
+That runs `sanity deploy` in `apps/studio`. Configure Studio env vars wherever you deploy:
+
+- `SANITY_PROJECT_ID`
+- `SANITY_DATASET`
+- `SANITY_API_VERSION` (optional)
+
+### Studio deployment (GitHub Actions)
+
+The workflow [`.github/workflows/deploy-studio.yml`](../.github/workflows/deploy-studio.yml) deploys hosted Studio on **`main`** when files under **`apps/studio/`** or **`packages/locales/`** change. You can also run it manually from the Actions tab (**workflow_dispatch**).
+
+Configure these **repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Purpose |
+|--------|---------|
+| `SANITY_AUTH_TOKEN` | Required for non-interactive `sanity deploy`. Create a token with deploy access in [sanity.io/manage](https://www.sanity.io/manage). |
+| `SANITY_PROJECT_ID` | Same as local Studio / `apps/studio/sanity.config.ts`. |
+| `SANITY_DATASET` | Same. |
+| `SANITY_API_VERSION` | Optional; omit to use the default in `sanity.config.ts`. |
+
+The job runs `npm ci` at the repo root, then `npm run deploy:studio`.
 
 ## Sanity CORS origins
 
