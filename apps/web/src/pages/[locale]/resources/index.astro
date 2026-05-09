@@ -1,5 +1,6 @@
 ---
 import type { SupportedLocale } from "@brtu/locales";
+import ResourceDirectory from "../../../components/ResourceDirectory.tsx";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
@@ -31,6 +32,7 @@ for (const r of resources) {
   if (r.category) categoryMap.set(r.category.slug, r.category.title);
 }
 const categories = [...categoryMap.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+const categoryList = categories.map(([slug, title]) => ({ slug, title }));
 
 const langSwitcherAlternates = Object.fromEntries(
   publishedLocales.map((l) => [l, withLocalePath(l, "resources")]),
@@ -45,80 +47,5 @@ const langSwitcherAlternates = Object.fromEntries(
 >
   <h1>Resources</h1>
 
-  <div class="resource-toolbar" data-resource-filter style="margin: var(--space-6) 0;">
-    <span id="filter-label" class="visually-hidden">Filter by category</span>
-    <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);" role="group" aria-labelledby="filter-label">
-      <button
-        type="button"
-        class="btn btn--primary"
-        data-cat="__all__"
-        aria-pressed="true"
-        style="border: 2px solid var(--color-border); background: var(--color-bg); color: var(--color-text);"
-      >
-        All
-      </button>
-      {
-        categories.map(([catSlug, title]) => (
-          <button
-            type="button"
-            class="btn btn--primary"
-            data-cat={catSlug}
-            style="border: 2px solid var(--color-border); background: var(--color-bg); color: var(--color-text);"
-          >
-            {title}
-          </button>
-        ))
-      }
-    </div>
-  </div>
-
-  <ul class="resource-list" style="list-style: none; padding: 0; margin: 0;">
-    {
-      resources.map((r) => (
-        <li
-          class="card resource-item"
-          style="margin-bottom: var(--space-4);"
-          data-category={r.category?.slug ?? ""}
-        >
-          <h2 style="margin: 0 0 var(--space-2); font-size: 1.15rem;">
-            <a href={withLocalePath(locale, `resources/${r.slug}`)}>{r.title}</a>
-          </h2>
-          {r.category ? (
-            <p style="margin: 0 0 var(--space-2); font-size: 0.9rem; color: var(--color-text-muted);">
-              {r.category.title}
-            </p>
-          ) : null}
-          <p style="margin: 0 0 var(--space-2);">{r.summary}</p>
-          <p style="margin: 0; font-size: 0.9rem; color: var(--color-text-muted);">
-            Updated{" "}
-            <time datetime={r.updatedAt}>
-              {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(r.updatedAt))}
-            </time>
-          </p>
-        </li>
-      ))
-    }
-  </ul>
-
-  <script is:inline>
-    (() => {
-      const root = document.querySelector("[data-resource-filter]");
-      if (!root) return;
-      const buttons = root.querySelectorAll("button[data-cat]");
-      const items = document.querySelectorAll(".resource-item");
-      buttons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const cat = btn.getAttribute("data-cat");
-          buttons.forEach((b) => {
-            b.setAttribute("aria-pressed", b === btn ? "true" : "false");
-          });
-          items.forEach((li) => {
-            const slug = li.getAttribute("data-category") || "";
-            const show = cat === "__all__" || slug === cat;
-            li.style.display = show ? "" : "none";
-          });
-        });
-      });
-    })();
-  </script>
+  <ResourceDirectory client:visible locale={locale} categories={categoryList} resources={resources} />
 </BaseLayout>

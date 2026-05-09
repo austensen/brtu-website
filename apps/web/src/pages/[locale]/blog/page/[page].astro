@@ -1,5 +1,6 @@
 ---
 import type { SupportedLocale } from "@brtu/locales";
+import BlogPostIndex from "../../../../components/BlogPostIndex.tsx";
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 import { POSTS_PER_PAGE } from "../../../../lib/blog/constants";
 import type { LangHrefMap } from "../../../../lib/i18n/langAlternates";
@@ -58,6 +59,19 @@ for (const l of publishedLocales) {
     langSwitcherAlternates[l] = withLocalePath("en", `blog/page/${pageNum}`);
   }
 }
+
+const postsForIndex = posts.map((post) => {
+  const img = post.heroImage?.asset
+    ? urlForSanityImage(post.heroImage as never)?.width(800).url()
+    : null;
+  return {
+    title: post.title,
+    slug: post.slug,
+    publishedAt: post.publishedAt,
+    heroImageUrl: img ?? null,
+    heroAlt: post.heroImage?.alt?.trim() || "",
+  };
+});
 ---
 
 <BaseLayout
@@ -66,37 +80,5 @@ for (const l of publishedLocales) {
   langSwitcherAlternates={langSwitcherAlternates}
   pathAfterLocale={`blog/page/${pageNum}`}
 >
-  <h1>Blog</h1>
-  <p style="color: var(--color-text-muted);">Page {pageNum} of {totalPages}</p>
-  <ul style="list-style: none; padding: 0; margin: var(--space-6) 0 0;">
-    {
-      posts.map((post) => {
-        const img = post.heroImage?.asset
-          ? urlForSanityImage(post.heroImage as never)?.width(800).url()
-          : null;
-        const heroAlt = post.heroImage?.alt?.trim() || "";
-        return (
-          <li class="card" style="margin-bottom: var(--space-4);">
-            {img ? (
-              <a href={withLocalePath(locale, `blog/${post.slug}`)} style="display: block; margin-bottom: var(--space-3);">
-                <img src={img} alt={heroAlt} width="800" height="450" style="width: 100%; height: auto; border-radius: var(--radius);" loading="lazy" decoding="async" />
-              </a>
-            ) : null}
-            <h2 style="margin: 0 0 var(--space-2); font-size: 1.25rem;">
-              <a href={withLocalePath(locale, `blog/${post.slug}`)}>{post.title}</a>
-            </h2>
-            <time datetime={post.publishedAt} style="color: var(--color-text-muted); font-size: 0.9rem;">
-              {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(post.publishedAt))}
-            </time>
-          </li>
-        );
-      })
-    }
-  </ul>
-
-  <nav aria-label="Blog pagination" style="margin-top: var(--space-8); display: flex; flex-wrap: wrap; gap: var(--space-4);">
-    {pageNum > 2 ? <a href={withLocalePath(locale, `blog/page/${pageNum - 1}`)}>Newer posts</a> : null}
-    {pageNum === 2 ? <a href={withLocalePath(locale, "blog")}>Newer posts</a> : null}
-    {pageNum < totalPages ? <a href={withLocalePath(locale, `blog/page/${pageNum + 1}`)}>Older posts</a> : null}
-  </nav>
+  <BlogPostIndex locale={locale} posts={postsForIndex} pageNum={pageNum} totalPages={totalPages} />
 </BaseLayout>

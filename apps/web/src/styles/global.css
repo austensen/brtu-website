@@ -260,6 +260,7 @@ body {
   transform: rotate(-45deg);
 }
 
+/* Match NAV_MOBILE_MQ in apps/web/src/lib/responsive/breakpoints.ts */
 @media (max-width: 47.9375rem) {
   .site-header[data-menu-enhanced] .site-nav {
     width: 100%;

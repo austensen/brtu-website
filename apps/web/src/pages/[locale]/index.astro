@@ -1,5 +1,6 @@
 ---
 import type { SupportedLocale } from "@brtu/locales";
+import HomePageBody from "../../components/HomePageBody.tsx";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { fetchHomeLangHrefAlternates, englishSourceId } from "../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales } from "../../lib/i18n/locales";
@@ -67,6 +68,7 @@ const langSwitcherAlternates = await fetchHomeLangHrefAlternates(client, enId, p
   langSwitcherAlternates={langSwitcherAlternates}
   pathAfterLocale=""
 >
+  <!-- Locale home: sessionStorage marker for root→locale redirect UX; kept inline to avoid a client React bundle. -->
   <script is:inline slot="head">
     (() => {
       try {
@@ -77,6 +79,5 @@ const langSwitcherAlternates = await fetchHomeLangHrefAlternates(client, enId, p
     })();
   </script>
 
-  <h1>{page.title}</h1>
-  <div class="prose" set:html={bodyHtml} />
+  <HomePageBody title={page.title} bodyHtml={bodyHtml} />
 </BaseLayout>

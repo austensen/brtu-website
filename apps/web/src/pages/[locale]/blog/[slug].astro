@@ -1,5 +1,6 @@
 ---
 import type { SupportedLocale } from "@brtu/locales";
+import BlogPostArticle from "../../../components/BlogPostArticle.tsx";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import RedirectShell from "../../../components/RedirectShell.astro";
 import { fetchLangHrefAlternates, englishSourceId } from "../../../lib/i18n/langAlternates";
@@ -77,20 +78,14 @@ const heroAlt = post?.heroImage?.alt?.trim() ?? "";
       langSwitcherAlternates={langSwitcherAlternates}
       pathAfterLocale={pathAfterLocale}
     >
-      <article>
-        <h1>{post!.title}</h1>
-        <p>
-          <time datetime={post!.publishedAt} style="color: var(--color-text-muted);">
-            {new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date(post!.publishedAt))}
-          </time>
-        </p>
-        {heroUrl ? (
-          <p style="margin: var(--space-6) 0;">
-            <img src={heroUrl} alt={heroAlt} width="1200" height="675" style="width: 100%; height: auto; border-radius: var(--radius);" loading="eager" decoding="async" />
-          </p>
-        ) : null}
-        <div class="prose" set:html={bodyHtml} />
-      </article>
+      <BlogPostArticle
+        locale={locale}
+        title={post!.title}
+        publishedAt={post!.publishedAt}
+        heroUrl={heroUrl}
+        heroAlt={heroAlt}
+        bodyHtml={bodyHtml}
+      />
     </BaseLayout>
   )
 }
