@@ -1,0 +1,28 @@
+---
+import type { SupportedLocale } from "@brtu/locales";
+import FooterLinks from "./FooterLinks";
+import FooterQrDrawer from "./FooterQrDrawer";
+
+interface Props {
+  organizationName: string;
+  locale: SupportedLocale;
+  aboutSlug: string;
+  contactSlug: string;
+}
+
+const { organizationName, locale, aboutSlug, contactSlug } = Astro.props;
+const base = Astro.site ?? new URL("http://localhost:4321/");
+const pageUrl = new URL(`${Astro.url.pathname}${Astro.url.search}`, base).href;
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <FooterLinks
+      organizationName={organizationName}
+      locale={locale}
+      aboutSlug={aboutSlug}
+      contactSlug={contactSlug}
+    />
+    <FooterQrDrawer client:load pageUrl={pageUrl} />
+  </div>
+</footer>
