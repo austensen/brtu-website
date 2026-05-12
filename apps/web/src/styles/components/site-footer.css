@@ -112,19 +112,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius) var(--radius) 0 0;
   box-shadow: 0 -4px 24px rgb(0 0 0 / 0.12);
-  animation: footerQrSlideUp 0.28s ease;
-}
-
-@keyframes footerQrSlideUp {
-  from {
-    transform: translateY(110%);
-    opacity: 0.96;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }
 
 .footer-qr-dialog__header {
