@@ -9,6 +9,37 @@ function dataUrlToBlob(dataUrl: string): Promise<Blob> {
   return fetch(dataUrl).then((r) => r.blob());
 }
 
+/** e.g. `/en/events` → `brtu-qr-en-events.png` (domain omitted; path sluggified). */
+function qrDownloadFilename(pageUrl: string): string {
+  const slugPart = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  let pathSlug = "home";
+  try {
+    const u = new URL(pageUrl);
+    const segments = u.pathname.split("/").map(slugPart).filter(Boolean);
+    pathSlug = segments.length ? segments.join("-") : "home";
+    if (u.search.length > 1) {
+      const qs = u.search
+        .slice(1)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80);
+      if (qs) pathSlug = `${pathSlug}-${qs}`;
+    }
+  } catch {
+    pathSlug = "page";
+  }
+
+  const base = `brtu-qr-${pathSlug}`.replace(/-+/g, "-");
+  const capped = base.length > 180 ? `${base.slice(0, 180)}`.replace(/-+$/, "") : base;
+  return `${capped || "brtu-qr"}.png`;
+}
+
 export default function FooterQrDrawer({ pageUrl }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -66,7 +97,7 @@ export default function FooterQrDrawer({ pageUrl }: Props) {
     if (!dataUrl) return;
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.download = "brtu-qr-code.png";
+    a.download = qrDownloadFilename(pageUrl);
     a.rel = "noopener";
     a.click();
   };
