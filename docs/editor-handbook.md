@@ -91,6 +91,7 @@ The public **Contact** page uses a Netlify form when **contact form** fields are
 Important behavior:
 
 - The form **posts** to the same path with **`?sent=1`**. After a successful submit, Netlify redirects back to that URL and visitors see the **success message** from the CMS.
+- The **error message** is shown only if a submission **fails to send** (for example a network error), not as standing text on the page.
 - A **honeypot** field is included for spam protection — do not remove or rename hidden fields unless a developer changes the template.
 
 If submissions never arrive, check Netlify form settings and spam filtering; technical contacts are in [Break-glass contacts](#break-glass-contacts-fill-in-locally).
