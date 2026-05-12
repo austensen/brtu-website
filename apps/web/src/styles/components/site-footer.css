@@ -77,21 +77,27 @@
   outline-offset: 3px;
 }
 
-/* QR drawer (native dialog, bottom sheet) */
+/* QR drawer (native dialog, bottom sheet).
+ * Closed <dialog> must stay `display: none`; author `display: grid` alone overrides UA hiding. */
 .footer-qr-dialog {
+  display: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.footer-qr-dialog[open] {
   display: grid;
   align-items: end;
   justify-items: center;
-  box-sizing: border-box;
-  margin: 0;
   padding: var(--space-4);
   padding-bottom: max(var(--space-6), env(safe-area-inset-bottom, 0px));
-  border: none;
   width: 100vw;
   max-width: 100vw;
   height: 100dvh;
   max-height: 100dvh;
-  background: transparent;
 }
 
 .footer-qr-dialog::backdrop {
