@@ -44,6 +44,11 @@ export default function FooterLinks({
       <p className="site-footer__copyright">
         © {year} {organizationName}
       </p>
+      <p className="site-footer__netlify">
+        <a href="https://www.netlify.com/" rel="noopener noreferrer">
+          This site is powered by Netlify
+        </a>
+      </p>
     </div>
   );
 }

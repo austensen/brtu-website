@@ -40,6 +40,32 @@
   margin: 0;
 }
 
+.site-footer__netlify {
+  margin: var(--space-2) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.site-footer__netlify a {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.site-footer__netlify a:hover,
+.site-footer__netlify a:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.site-footer__netlify a:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .site-footer__links a {
   color: var(--color-text-muted);
   font-weight: 600;
