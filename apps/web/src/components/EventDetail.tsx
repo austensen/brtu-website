@@ -19,15 +19,31 @@ type Props = {
   icsHref: string;
 };
 
+function calendarDateKeyInTz(d: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 function formatRange(startIso: string, endIso: string, tz: string, loc: string) {
   const start = new Date(startIso);
   const end = new Date(endIso);
-  const dOpts: Intl.DateTimeFormatOptions = {
+  const fullOpts: Intl.DateTimeFormatOptions = {
     dateStyle: "full",
     timeStyle: "short",
     timeZone: tz,
   };
-  return `${new Intl.DateTimeFormat(loc, dOpts).format(start)} – ${new Intl.DateTimeFormat(loc, dOpts).format(end)}`;
+  const startStr = new Intl.DateTimeFormat(loc, fullOpts).format(start);
+
+  if (calendarDateKeyInTz(start, tz) === calendarDateKeyInTz(end, tz)) {
+    const endTimeOpts: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: tz };
+    return `${startStr} – ${new Intl.DateTimeFormat(loc, endTimeOpts).format(end)}`;
+  }
+
+  return `${startStr} – ${new Intl.DateTimeFormat(loc, fullOpts).format(end)}`;
 }
 
 export default function EventDetail({
