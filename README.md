@@ -7,9 +7,7 @@ Monorepo with:
 
 ## Licenses
 
-This repository is source-available and non-commercial.
-
-- Code: see `LICENSE` (`PolyForm-Noncommercial-1.0.0`)
+- Code: see `LICENSE` (GNU Affero General Public License v3.0, `AGPL-3.0`)
 - Content/media/docs: see `LICENSE-CONTENT` (`CC-BY-NC-SA-4.0`)
 
 ## Getting started
