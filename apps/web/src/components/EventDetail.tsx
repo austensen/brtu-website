@@ -11,20 +11,39 @@ type Props = {
   location?: string | null;
   mapLink?: string | null;
   joinUrl?: string | null;
+  flyerUrl?: string | null;
+  flyerMimeType?: string | null;
+  flyerFilename?: string | null;
   bodyHtml: string;
   gcal: string;
   icsHref: string;
 };
 
+function calendarDateKeyInTz(d: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 function formatRange(startIso: string, endIso: string, tz: string, loc: string) {
   const start = new Date(startIso);
   const end = new Date(endIso);
-  const dOpts: Intl.DateTimeFormatOptions = {
+  const fullOpts: Intl.DateTimeFormatOptions = {
     dateStyle: "full",
     timeStyle: "short",
     timeZone: tz,
   };
-  return `${new Intl.DateTimeFormat(loc, dOpts).format(start)} – ${new Intl.DateTimeFormat(loc, dOpts).format(end)}`;
+  const startStr = new Intl.DateTimeFormat(loc, fullOpts).format(start);
+
+  if (calendarDateKeyInTz(start, tz) === calendarDateKeyInTz(end, tz)) {
+    const endTimeOpts: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: tz };
+    return `${startStr} – ${new Intl.DateTimeFormat(loc, endTimeOpts).format(end)}`;
+  }
+
+  return `${startStr} – ${new Intl.DateTimeFormat(loc, fullOpts).format(end)}`;
 }
 
 export default function EventDetail({
@@ -36,10 +55,17 @@ export default function EventDetail({
   location,
   mapLink,
   joinUrl,
+  flyerUrl,
+  flyerMimeType,
+  flyerFilename,
   bodyHtml,
   gcal,
   icsHref,
 }: Props) {
+  const mime = flyerMimeType ?? "";
+  const isImage = Boolean(flyerUrl && mime.startsWith("image/"));
+  const isPdf = Boolean(flyerUrl && mime === "application/pdf");
+
   return (
     <article>
       <h1>{title}</h1>
@@ -64,6 +90,39 @@ export default function EventDetail({
           </a>
         ) : null}
       </p>
+      {flyerUrl && (isImage || isPdf) ? (
+        <div className={styles.flyer}>
+          {isImage ? (
+            <img
+              className={styles.flyerImg}
+              src={flyerUrl}
+              alt={`Promotional flyer for ${title}`}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <>
+              <iframe
+                className={styles.flyerPdf}
+                src={flyerUrl}
+                title="Event flyer PDF"
+              />
+              <p className={styles.flyerPdfLink}>
+                <a href={flyerUrl} rel="noopener noreferrer" target="_blank">
+                  Open PDF
+                </a>
+                {flyerFilename ? ` (${flyerFilename})` : null}
+              </p>
+            </>
+          )}
+        </div>
+      ) : flyerUrl ? (
+        <p className={styles.flyer}>
+          <a className="btn btn--primary" href={flyerUrl} rel="noopener noreferrer" target="_blank">
+            {flyerFilename ? `Download ${flyerFilename}` : "Download flyer"}
+          </a>
+        </p>
+      ) : null}
       {location ? (
         <p>
           <strong>Location:</strong> {location}
