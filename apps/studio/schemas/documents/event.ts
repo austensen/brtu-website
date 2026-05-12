@@ -84,6 +84,16 @@ export const event = defineType({
       type: "url",
     }),
     defineField({
+      name: "promotionalFlyer",
+      title: "Promotional flyer",
+      type: "file",
+      description:
+        "Optional image or PDF shown only on the event detail page (not the events list).",
+      options: {
+        accept: ".pdf,.jpg,.jpeg,.png,.webp",
+      },
+    }),
+    defineField({
       name: "description",
       title: "Description",
       type: "richText",

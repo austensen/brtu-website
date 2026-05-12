@@ -48,6 +48,9 @@ const event = showRedirect
       location?: string | null;
       mapLink?: string | null;
       joinUrl?: string | null;
+      promotionalFlyer?: {
+        asset?: { url: string; originalFilename?: string | null; mimeType?: string | null } | null;
+      } | null;
       description: unknown;
       translationOf?: { _id: string } | null;
     }>(eventBySlugAndLocale, { locale, slug });
@@ -81,6 +84,11 @@ const gcal = event
   : "";
 
 const icsHref = `/calendar/${locale}/${slug}.ics`;
+
+const flyerAsset = event?.promotionalFlyer?.asset;
+const flyerUrl = flyerAsset?.url ?? null;
+const flyerMimeType = flyerAsset?.mimeType ?? null;
+const flyerFilename = flyerAsset?.originalFilename ?? null;
 ---
 
 {
@@ -102,6 +110,9 @@ const icsHref = `/calendar/${locale}/${slug}.ics`;
         location={event!.location}
         mapLink={event!.mapLink}
         joinUrl={event!.joinUrl}
+        flyerUrl={flyerUrl}
+        flyerMimeType={flyerMimeType}
+        flyerFilename={flyerFilename}
         bodyHtml={bodyHtml}
         gcal={gcal}
         icsHref={icsHref}

@@ -191,6 +191,10 @@ export const eventBySlugAndLocale = /* groq */ `
     location,
     mapLink,
     joinUrl,
+    "promotionalFlyer": select(
+      defined(promotionalFlyer.asset->_id) => promotionalFlyer{asset->{url, originalFilename, mimeType}},
+      defined(translationOf->promotionalFlyer.asset->_id) => translationOf->promotionalFlyer{asset->{url, originalFilename, mimeType}}
+    ),
     description,
     translationOf->{ _id, "slug": slug.current, locale }
   }

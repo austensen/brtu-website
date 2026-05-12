@@ -8,3 +8,29 @@
   flex-wrap: wrap;
   gap: var(--space-3);
 }
+
+.flyer {
+  margin: var(--space-4) 0;
+  max-width: min(100%, 28rem);
+}
+
+.flyerImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md, 4px);
+}
+
+.flyerPdf {
+  display: block;
+  width: 100%;
+  min-height: 16rem;
+  max-height: min(70vh, 24rem);
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 4px);
+}
+
+.flyerPdfLink {
+  margin: var(--space-2) 0 0;
+  font-size: 0.9375rem;
+}
