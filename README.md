@@ -7,8 +7,12 @@ Monorepo with:
 
 ## Licenses
 
-- Code: see `LICENSE` (GNU Affero General Public License v3.0, `AGPL-3.0`)
+- Code: see `LICENSE` (GNU General Public License v3.0 only, `GPL-3.0-only`)
 - Content/media/docs: see `LICENSE-CONTENT` (`CC-BY-NC-SA-4.0`)
+
+## Code of conduct
+
+Participation is covered by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Getting started
 
