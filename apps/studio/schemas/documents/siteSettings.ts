@@ -71,6 +71,14 @@ export const siteSettings = defineType({
         },
       ],
     }),
+    defineField({
+      name: "membersLoginHelp",
+      title: "Members login help",
+      type: "text",
+      rows: 4,
+      description:
+        "Shown on the public Members login page for this locale (e.g. how to get the password or who to contact). Plain text only.",
+    }),
   ],
   preview: {
     select: {

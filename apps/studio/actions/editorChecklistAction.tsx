@@ -2,7 +2,10 @@ import { CheckmarkCircleIcon } from "@sanity/icons";
 import { Stack, Text } from "@sanity/ui";
 import type { DocumentActionComponent } from "sanity";
 
-function checklistForType(schemaType: string): string[] {
+function checklistForType(
+  schemaType: string,
+  draft?: Record<string, unknown> | null,
+): string[] {
   const common = [
     "Locale matches the audience for this document.",
     'Non-English documents: set "English source document" to the matching published English entry.',
@@ -26,14 +29,28 @@ function checklistForType(schemaType: string): string[] {
         "Category is set for this locale.",
         ...common,
       ];
-    case "event":
-      return [
+    case "event": {
+      const lines = [
         "Start and end times, timezone, and location look correct.",
         "Slug is unique for this locale.",
         ...common,
       ];
-    case "resourceCategory":
-      return ["Title and slug are set.", ...common];
+      if (draft?.membersOnly) {
+        lines.push(
+          "Members only is ON: confirm translations use the same setting and members can access this event after logging in.",
+        );
+      }
+      return lines;
+    }
+    case "resourceCategory": {
+      const lines = ["Title and slug are set.", ...common];
+      if (draft?.membersOnly) {
+        lines.push(
+          "Members only is ON: confirm translations use the same setting; resources in this category are hidden until login.",
+        );
+      }
+      return lines;
+    }
     case "siteSettings":
       return ["Organization name and short description are up to date.", ...common];
     default:
@@ -42,8 +59,8 @@ function checklistForType(schemaType: string): string[] {
 }
 
 export const editorChecklistAction: DocumentActionComponent = (props) => {
-  const { onComplete, type: schemaType } = props;
-  const items = checklistForType(schemaType);
+  const { onComplete, type: schemaType, draft } = props;
+  const items = checklistForType(schemaType, draft as Record<string, unknown> | null);
 
   return {
     label: "Editor checklist",
