@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "env NETLIFY_DEV=1 astro dev",
     "build": "tsx scripts/generate-event-ics.ts && astro build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

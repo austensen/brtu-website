@@ -20,6 +20,9 @@ const site =
 // Astro 5 removed `output: "hybrid"`; static + per-route `prerender = false`
 // is the documented replacement (see https://docs.astro.build/en/guides/on-demand-rendering/).
 // The Netlify adapter handles on-demand rendering for routes that opt out of prerendering.
+//
+// `npm run dev` sets NETLIFY_DEV=1 so @netlify/vite-plugin skips its dev middleware; otherwise POST
+// (login/logout forms, etc.) can hang indefinitely. `netlify dev` sets this env itself.
 export default defineConfig({
   output: "static",
   site,
