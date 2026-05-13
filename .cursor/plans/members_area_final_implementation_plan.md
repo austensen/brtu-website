@@ -10,7 +10,7 @@ todos:
     status: completed
   - id: step-03-astro-hybrid
     content: "Step 3: @astrojs/netlify + hybrid + prerender=false on 5 routes"
-    status: pending
+    status: completed
   - id: step-04-auth
     content: "Step 4: Session cookie + login/logout server routes (plaintext MEMBERS_PASSWORD compare)"
     status: pending
@@ -425,4 +425,93 @@ Authoritative plan: `.cursor/plans/members_area_final_implementation_plan.md` �
 Append `### Step 3 — Implementation log`, `### Context updates`, `### Step 4 — Prompt packet` (auth per master plan **Auth and session**).
 
 Do not implement Step 4 in the same PR unless explicitly asked.
+```
+
+---
+
+### Step 3 — Implementation log (2026-05-12)
+
+- **Branch / PR:** local (no PR number).
+- **Files changed:**
+  - [`apps/web/package.json`](../apps/web/package.json) — added `@astrojs/netlify@^6.6.5` (Astro 5–compatible series; 7.x requires Astro 6).
+  - [`apps/web/astro.config.mjs`](../apps/web/astro.config.mjs) — imported `@astrojs/netlify`, wired `adapter: netlify()`; `output` stays `"static"` (see decision below).
+  - [`apps/web/src/pages/[locale]/events/index.astro`](../apps/web/src/pages/%5Blocale%5D/events/index.astro) — added `export const prerender = false`.
+  - [`apps/web/src/pages/[locale]/events/[slug].astro`](../apps/web/src/pages/%5Blocale%5D/events/%5Bslug%5D.astro) — added `export const prerender = false`.
+  - [`apps/web/src/pages/[locale]/resources/index.astro`](../apps/web/src/pages/%5Blocale%5D/resources/index.astro) — added `export const prerender = false`.
+  - [`apps/web/src/pages/[locale]/resources/[slug].astro`](../apps/web/src/pages/%5Blocale%5D/resources/%5Bslug%5D.astro) — added `export const prerender = false`.
+  - [`apps/web/src/pages/[locale]/members/index.astro`](../apps/web/src/pages/%5Blocale%5D/members/index.astro) — **new**; SSR placeholder using `BaseLayout` with an `<h1>Members</h1>` (Step 4 wires real auth UI).
+- **Behavioral outcome:** `npm run build` at the monorepo root succeeds end-to-end. The web build now reports `mode: "server"`, `adapter: @astrojs/netlify`, emits a Netlify SSR Function (`build/entry.mjs`), writes `_redirects`, and continues to prerender the remaining static routes (home, locale home, `[slug]`, blog list/detail/pagination). The five SSR routes (events list/detail, resources list/detail, members) are now served on demand by the Netlify Function.
+- **Deviation from packet wording:** Astro 5 removed `output: "hybrid"` ([merge PR #11824](https://github.com/withastro/astro/pull/11824); a future Astro release adds an explicit error if `"hybrid"` is set). The documented Astro 5 replacement is `output: "static"` + per-route `export const prerender = false`, which is exactly the **SSR scope** locked in this plan. `output` remains `"static"` in `astro.config.mjs`; behavior matches the master plan's hybrid intent.
+- **Expected non-fatal warnings:** the build prints four `[WARN] [router] getStaticPaths() ignored in dynamic page …` lines for the events/resources routes. They're documented Astro behavior when a dynamic route is opted out of prerendering and don't fail the build; Step 5 will refactor these handlers (drop `getStaticPaths`, read params + cookie at request time) when it wires Public/Full fetch switching and the unauthenticated noindex stub.
+- **Deploy notes:** None for Studio. For the web app, the **Netlify site must be configured to deploy the `apps/web` build** with the adapter-emitted SSR function (the existing build command `npm run build` already produces `apps/web/dist/` + `.netlify/functions/`). Deployment env wiring (server-only secrets) is **Step 4 / Step 7** scope; nothing new must be set in Netlify just to ship Step 3 (the adapter functions only render existing pages with the existing public env).
+- **Follow-ups / risks:**
+  - The members route renders at `/[locale]/members` for any URL-shaped locale; only `publishedLocales` (currently `["en"]`) returns 200, others 404 — consistent with sibling pages.
+  - SSR routes will be billed per Netlify Function invocation. The acceptance notes in [`members_only_real_concealment_seo_plan.md`](members_only_real_concealment_seo_plan.md) cover the billing envelope.
+  - When Step 5 lands, also revisit `Cache-Control` / `Vary: Cookie` (currently inherits adapter defaults; the master plan's caching note is still pending).
+
+### Context updates for downstream steps
+
+- **Astro `output`** is `"static"` (Astro 5 unified mode), **not** `"hybrid"`. Treat the literal string `"hybrid"` from the master plan as historical/intent-only; Astro 5 errors on it. Per-route `export const prerender = false` is the canonical opt-in for SSR.
+- **Adapter:** `@astrojs/netlify@^6.6.5` (6.x line; 7.x is Astro 6 only). Imported as `import netlify from "@astrojs/netlify"` and used as `adapter: netlify()` in `astro.config.mjs`. Pin major when bumping until Astro is upgraded.
+- **SSR routes (Step 3 surface):** `[locale]/events/index.astro`, `[locale]/events/[slug].astro`, `[locale]/resources/index.astro`, `[locale]/resources/[slug].astro`, `[locale]/members/index.astro` — all opt-out of prerender. Step 4 server endpoints should live under `apps/web/src/pages/api/members/…` (per master plan **Auth and session → Auth transport**) and will inherit the same Netlify Function.
+- **Server endpoints location convention:** Astro file-routed under `apps/web/src/pages/` (e.g. `apps/web/src/pages/api/members/login.ts` with `export const POST`). **Do not** add a parallel `netlify/functions/` tree.
+- **Members placeholder DOM:** the `<h1>Members</h1>` is the only content rendered in Step 3; Step 4 should replace the `<main>` body with the real login form / help text / sign-out UI but keep the `BaseLayout` props (`title="Members"`, `pathAfterLocale="members"`, `langSwitcherAlternates`).
+- **`getStaticPaths` cleanup is deferred:** the four legacy `getStaticPaths()` exports in the events/resources pages are intentionally retained; Step 5 will remove them when it refactors per-request fetches. Build warnings are expected until then.
+
+### Step 4 — Prompt packet (copy-paste for next agent)
+
+```markdown
+## Task: Members area — Step 4 (Auth routes + session cookie)
+
+Authoritative plan: `.cursor/plans/members_area_final_implementation_plan.md` — read **Auth and session**, **Locked decisions (round 1 + round 2)**, and the Step 3 implementation log + context updates.
+
+### Preconditions (already shipped in Step 3)
+- `@astrojs/netlify@^6.6.5` installed; `adapter: netlify()` in `apps/web/astro.config.mjs`.
+- Astro `output` is `"static"` (Astro 5 unified mode); `export const prerender = false` is set on the five SSR routes.
+- SSR placeholder exists at `apps/web/src/pages/[locale]/members/index.astro` (BaseLayout + `<h1>Members</h1>`) — Step 4 will replace its body.
+
+### Scope
+1. **Session helper** at `apps/web/src/lib/members/session.ts` (or equivalent under `src/lib/members/`):
+   - **Cookie name:** single exported constant, e.g. `MEMBER_SESSION_COOKIE = "brtu_member_session"`.
+   - **Signing:** HMAC-SHA256 (or JWT-HS256) over an opaque payload (e.g. `{ iat, exp }`) using `MEMBERS_SESSION_SECRET`. Use Node's `crypto` (Node 20+ is available; the repo's root `engines.node` is `>=20`).
+   - **Issue:** `createSessionCookie(): SetCookie string` with `HttpOnly`, `Secure` (in production), `SameSite=Lax`, `Path=/`, **`Max-Age` ≈ 180 days** (locked decision). Document the sliding-refresh option in a code comment but don't implement.
+   - **Clear:** `clearSessionCookie(): SetCookie` with `Max-Age=0`.
+   - **Verify:** `getMemberSession(request: Request): { authenticated: boolean }` — reads the cookie header, verifies signature + `exp`, returns `{ authenticated: false }` on any failure (no throw).
+   - **Constant-time compare** helper using `crypto.timingSafeEqual` on equal-length buffers; pad/reject unequal lengths safely.
+2. **Server endpoints** (Astro file-routed; no `netlify/functions/` tree):
+   - `apps/web/src/pages/api/members/login.ts` — `export const prerender = false; export const POST: APIRoute = ...`. Accept `application/x-www-form-urlencoded` (and JSON, optional). Compare submitted password to `MEMBERS_PASSWORD` in **constant time**. On success: `Set-Cookie` + **302** to `Referer` (same-origin only) or `/{locale}/members`. On failure: **401** with a generic error string (no oracles). Generic error copy lives in code; English-only for v1.
+   - `apps/web/src/pages/api/members/logout.ts` — `export const prerender = false; export const POST: APIRoute = ...`. Always clear cookie; **302** to `/{locale}/members` (or `/{locale}/`).
+   - `apps/web/src/pages/api/members/bootstrap.ts` — `export const prerender = false; export const GET: APIRoute = ...`. Read `t` query param; `timingSafeEqual(t, MEMBERS_MAGIC_LINK_TOKEN)`; on match, `Set-Cookie` + **302** to the same path **without** the `t` query string (read intended destination from a server-validated `to` param or default to `/{locale}/members`); on mismatch/absent, **302** to `/{locale}/members` with **no** cookie set (avoid 404 enumeration).
+3. **Env wiring (server-only):**
+   - Add (as **server-only**, never `PUBLIC_*`): `MEMBERS_SESSION_SECRET`, `MEMBERS_PASSWORD`, `MEMBERS_MAGIC_LINK_TOKEN`.
+   - Read via `import.meta.env` or `process.env` (whichever the codebase uses in SSR contexts; check `apps/web/src/lib/sanity/client.ts` for the existing pattern). **Do not** import these in any file shipped to the client bundle.
+   - Update [`apps/web/.env.example`](../apps/web/.env.example) (or create it) with placeholder lines and a comment that these must also live in the Netlify UI for production. **Do not** commit real values.
+4. **Members page (replace placeholder):**
+   - `apps/web/src/pages/[locale]/members/index.astro` — call `getMemberSession(Astro.request)`; if authenticated, render a Sign-out form (`<form method="post" action="/api/members/logout">`); if not, render a login form (`<form method="post" action="/api/members/login">` with a `password` field) plus a placeholder for `siteSettings.membersLoginHelp` (the GROQ is already wired in Step 2 — fetch via `siteSettingsByLocale` and render `membersLoginHelp` as plain text with line breaks, no HTML).
+   - Keep `prerender = false`. Keep `BaseLayout` props unchanged.
+
+### Out of scope
+- Public vs Full GROQ switching on events/resources pages (Step 5).
+- HeaderNav "Members" link + magic-link UI polish (Step 6).
+- Sitemap/robots and docs/curl acceptance (Step 7).
+- Per-user accounts, one-time tokens, password hashing in env.
+
+### Constraints
+- Minimal diffs; keep existing naming conventions.
+- **Never** expose secrets via `PUBLIC_*` or client bundles.
+- No new top-level dependencies if `crypto` from Node 20 suffices (HMAC + `timingSafeEqual` are stdlib). If a JWT lib is added, prefer a tiny, audited one (e.g. `jose`) and pin a version.
+- `npm run typecheck` and `npm run build` from the repo root must both pass. The four "getStaticPaths() ignored" warnings from Step 3 should remain (Step 5 removes them).
+
+### Verification
+- `npm run typecheck` at repo root.
+- `npm run build` at repo root.
+- Local smoke (optional, not required to ship): `npm run dev` in `apps/web`; visit `/{locale}/members`; submit form with wrong password → generic 401; submit with right password → 302 to members page + cookie set; reload → "Sign out" shown.
+
+### Mandatory: update master plan
+Append to `.cursor/plans/members_area_final_implementation_plan.md`:
+1. `### Step 4 — Implementation log (YYYY-MM-DD)` — files added/changed; cookie name; env vars introduced; any cryptographic choices (HMAC vs JWT); deploy notes (Netlify env UI setup); follow-ups.
+2. `### Context updates for downstream steps` — exact exported symbols (`MEMBER_SESSION_COOKIE`, `getMemberSession`, helpers), API route paths, env var names as they appear in `.env`/Netlify UI.
+3. `### Step 5 — Prompt packet (copy-paste for next agent)` — full packet: wire `getMemberSession` in the four events/resources SSR pages to choose Public vs Full queries; render the unauthenticated noindex stub on members-only detail; drop the deferred `getStaticPaths()` exports; ensure ICS still excludes members-only events; build + typecheck must pass; then chain the same mandatory-append rule for Step 6.
+
+Do not implement Step 5 in the same PR unless explicitly asked.
 ```

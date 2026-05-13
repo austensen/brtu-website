@@ -8,6 +8,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@astrojs/netlify": "^6.6.5",
     "@astrojs/react": "^5.0.0",
     "@brtu/locales": "*",
     "@portabletext/to-html": "^2.0.17",

@@ -1,0 +1,30 @@
+---
+// SSR (Astro hybrid via @astrojs/netlify). See `.cursor/plans/members_area_final_implementation_plan.md`.
+// Step 3 ships only this placeholder so build + adapter wiring are exercised end-to-end.
+// Step 4 adds session-aware login/sign-out UI; Step 6 wires HeaderNav + magic-link bootstrap.
+export const prerender = false;
+
+import type { SupportedLocale } from "@brtu/locales";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+
+const locale = Astro.params.locale as SupportedLocale;
+if (!supportedLocales.includes(locale)) {
+  return new Response(null, { status: 404 });
+}
+
+const langSwitcherAlternates = Object.fromEntries(
+  publishedLocales.map((l) => [l, withLocalePath(l, "members")]),
+) as LangHrefMap;
+---
+
+<BaseLayout
+  title="Members"
+  locale={locale}
+  langSwitcherAlternates={langSwitcherAlternates}
+  pathAfterLocale="members"
+>
+  <h1>Members</h1>
+  <p>This page will host members-only login, help text, and sign-out in Step 4.</p>
+</BaseLayout>

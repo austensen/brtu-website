@@ -1,4 +1,8 @@
 ---
+// SSR (Astro hybrid via @astrojs/netlify). See `.cursor/plans/members_area_final_implementation_plan.md`.
+// Step 5 wires session-aware fetch switching and the unauthenticated-noindex stub.
+export const prerender = false;
+
 import type { SupportedLocale } from "@brtu/locales";
 import ResourceDetail from "../../../components/ResourceDetail.tsx";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
