@@ -39,6 +39,9 @@ export default function FooterLinks({
           <li>
             <a href={withLocalePath(locale, "events")}>Events</a>
           </li>
+          <li>
+            <a href={withLocalePath(locale, "members")}>Members</a>
+          </li>
         </ul>
       </nav>
       <p className="site-footer__copyright">

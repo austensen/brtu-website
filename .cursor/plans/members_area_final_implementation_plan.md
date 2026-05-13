@@ -13,7 +13,7 @@ todos:
     status: completed
   - id: step-04-auth
     content: "Step 4: Session cookie + login/logout server routes (plaintext MEMBERS_PASSWORD compare)"
-    status: pending
+    status: completed
   - id: step-05-ssr-content
     content: "Step 5: SSR lists + detail stubs/noindex for events and resources"
     status: pending
@@ -515,3 +515,93 @@ Append to `.cursor/plans/members_area_final_implementation_plan.md`:
 
 Do not implement Step 5 in the same PR unless explicitly asked.
 ```
+
+---
+
+### Step 4 — Implementation log (2026-05-12)
+
+- **Branch / PR:** local (no PR number).
+- **Files changed / added:**
+  - [`apps/web/src/lib/members/session.ts`](../apps/web/src/lib/members/session.ts) — **new**; HMAC-SHA256 signed session (`base64url(JSON { iat, exp })` + `.` + `base64url(HMAC)`), cookie helpers, `getMemberSession`, `constantTimeEqualUtf8`, `getMembersPassword`, `getMembersMagicLinkToken` (server env readers co-located with signing).
+  - [`apps/web/src/pages/api/members/login.ts`](../apps/web/src/pages/api/members/login.ts) — **new**; `POST`, form + optional JSON, constant-time password check, `Set-Cookie` + `302` to same-origin `Referer` or `/{locale}/members`, generic **401** text on failure.
+  - [`apps/web/src/pages/api/members/logout.ts`](../apps/web/src/pages/api/members/logout.ts) — **new**; `POST`, clears cookie, `302` to `/{locale}/members`.
+  - [`apps/web/src/pages/api/members/bootstrap.ts`](../apps/web/src/pages/api/members/bootstrap.ts) — **new**; `GET`; `t` vs `MEMBERS_MAGIC_LINK_TOKEN` (constant-time); optional same-origin `to` path (validated; `t` stripped from query on redirect); mismatch → `302` to `/en/members` (via `defaultLocale`) with no cookie.
+  - [`apps/web/src/pages/[locale]/members/index.astro`](../apps/web/src/pages/%5Blocale%5D/members/index.astro) — session-aware UI, Sanity `siteSettingsByLocale` for `membersLoginHelp` (plain text, `white-space: pre-wrap`), login + sign-out forms posting to API routes.
+  - [`apps/web/src/env.d.ts`](../apps/web/src/env.d.ts) — optional typings for `MEMBERS_*` (server-only).
+  - [`apps/web/.env.example`](../apps/web/.env.example) — placeholders + Netlify UI comment.
+- **Cookie name (v1):** `brtu_member_session` — exported as **`MEMBER_SESSION_COOKIE`**.
+- **Cryptography:** **HMAC-SHA256** over the base64url payload (stdlib `node:crypto` only; no JWT library).
+- **Env vars (server-only, never `PUBLIC_*`):** `MEMBERS_SESSION_SECRET`, `MEMBERS_PASSWORD`, `MEMBERS_MAGIC_LINK_TOKEN` — read in SSR/API via `import.meta.env` with `process.env` fallback (matches Sanity client pattern for runtime injection on Netlify).
+- **Deploy notes:** In **Netlify → Site configuration → Environment variables**, set the three `MEMBERS_*` values for Production (and Preview if desired). Local: add them to repo-root `.env` and/or `apps/web/.env` (gitignored); never commit real secrets. Until secrets are set, login/bootstrap cannot issue a session (`createSessionCookie()` returns `null` → login responds **401** with the same generic copy as a bad password).
+- **Follow-ups:** Step 5 wires `getMemberSession` into events/resources SSR + stubs; Step 6 may link to `/api/members/bootstrap?…`; Step 7 documents curl + `docs/ws-j-deploy-ci-env.md`. Consider `Cache-Control` / `Vary: Cookie` when authenticated HTML diverges (still pending from Step 3 notes).
+
+### Context updates for downstream steps
+
+- **Exports from** `apps/web/src/lib/members/session.ts`:
+  - **`MEMBER_SESSION_COOKIE`** — string literal `brtu_member_session`.
+  - **`createSessionCookie(): string | null`** — full `Set-Cookie` value; `null` if `MEMBERS_SESSION_SECRET` unset.
+  - **`clearSessionCookie(): string`** — clearing `Set-Cookie` (`Max-Age=0`).
+  - **`getMemberSession(request: Request): { authenticated: boolean }`** — never throws; invalid/expired/missing cookie → `{ authenticated: false }`.
+  - **`constantTimeEqualUtf8(a, b): boolean`** — UTF-8 safe constant-time compare (used by login/bootstrap for password/token).
+  - **`getMembersPassword()`** / **`getMembersMagicLinkToken()`** — trimmed server env strings (empty if unset).
+- **API routes (all `export const prerender = false`):**
+  - **`POST /api/members/login`** — `apps/web/src/pages/api/members/login.ts`
+  - **`POST /api/members/logout`** — `apps/web/src/pages/api/members/logout.ts`
+  - **`GET /api/members/bootstrap`** — query: `t` (required for success), optional `to` (same-origin path only; `t` removed from destination query on success).
+- **Forms:** Login and logout POST bodies should include hidden **`locale`** (supported locale string) so redirects target the correct `/{locale}/members` when `Referer` is absent or unsafe.
+- **Bootstrap failure redirect:** `withLocalePath(defaultLocale, "members")` → currently **`/en/members`** (same as `defaultLocale` in `@brtu/locales`).
+- **Netlify / `.env` keys:** `MEMBERS_SESSION_SECRET`, `MEMBERS_PASSWORD`, `MEMBERS_MAGIC_LINK_TOKEN` (identical names in Netlify UI and local env files).
+
+### Step 5 — Prompt packet (copy-paste for next agent)
+
+```markdown
+## Task: Members area — Step 5 (SSR Public vs Full + detail stubs)
+
+Authoritative plan: `.cursor/plans/members_area_final_implementation_plan.md` — read **Locked decisions (round 1 + round 2)**, **GROQ and data loading**, **Step 2 + Step 4 context updates**, and this packet.
+
+### Preconditions (shipped before this step)
+
+- **Step 2:** Public/Full GROQ pairs and legacy Full aliases in `apps/web/src/lib/sanity/queries.ts` (see Step 2 log for exact export names: `*Public` / `*Full`, `allEventsForIcs` excludes members-only).
+- **Step 3:** Astro `output: "static"` + `@astrojs/netlify`; `export const prerender = false` on the five SSR routes; four routes still use deferred `getStaticPaths()` (build warnings OK until this step removes them).
+- **Step 4:** `getMemberSession(Astro.request)` in `apps/web/src/lib/members/session.ts`; API routes under `/api/members/*`; session cookie **`brtu_member_session`**.
+
+### Scope
+
+1. **Wire session into the four events/resources SSR pages** (`[locale]/events/index.astro`, `[locale]/events/[slug].astro`, `[locale]/resources/index.astro`, `[locale]/resources/[slug].astro`):
+   - Call **`getMemberSession(Astro.request)`** once per request (or equivalent).
+   - If **`authenticated`**: fetch with **Full** query constants (`…Full`, or legacy aliases that already map to Full per Step 2).
+   - If not authenticated: fetch with **Public** query constants (`…Public`).
+2. **Members-only detail (unauthenticated):** When the resolved document is members-only (event `membersOnly` / resource in members-only category per existing projections) **and** the session is not authenticated: render the **HTTP 200 stub** — generic `<title>` / meta, minimal body copy, **`noindex, nofollow`** (meta and/or `X-Robots-Tag` per locked decision). Do not leak member-only titles or body in HTML or `<head>`.
+3. **Remove deferred `getStaticPaths()`** from those four pages: resolve `locale` / `slug` from `Astro.params` at request time, return **404** when params invalid (keep alignment with `supportedLocales` / existing patterns).
+4. **ICS:** Confirm **`allEventsForIcs`** (or the script that consumes it) still **excludes members-only events**; no regression in `npm run build` (ICS generation runs in web build).
+5. **Caching:** Prefer sensible **`Cache-Control` / `Vary: Cookie`** (or documented adapter defaults) so authenticated HTML is not served as anonymous at the CDN — at minimum, document in code comment if the adapter already does the right thing.
+
+### Out of scope
+
+- HeaderNav “Members” link and magic-link UX polish (**Step 6**).
+- Sitemap/robots and `docs/ws-j` / curl checklist (**Step 7**).
+- Changing session cookie format or login/logout/bootstrap handlers unless typecheck forces a small fix.
+
+### Constraints
+
+- Minimal diffs; reuse **`getMemberSession`** and existing query exports; **no** `PUBLIC_*` for secrets.
+- **`npm run typecheck`** and **`npm run build`** from the **repo root** must pass.
+- The four **`getStaticPaths() ignored`** warnings should **disappear** after this step (expected cleanup).
+
+### Verification
+
+- `npm run typecheck` (repo root).
+- `npm run build` (repo root).
+- Manual: unauthenticated member-only detail URL returns **200** stub + **noindex**; authenticated cookie shows full content; lists hide member-only rows when anonymous.
+
+### Mandatory: update master plan
+
+Append to `.cursor/plans/members_area_final_implementation_plan.md`:
+
+1. `### Step 5 — Implementation log (YYYY-MM-DD)` — files touched; query switch behavior; stub/noindex behavior; ICS confirmation; any `Cache-Control` decisions.
+2. `### Context updates for downstream steps` — any new helpers, header patterns, or query renames.
+3. `### Step 6 — Prompt packet (copy-paste for next agent)` — full packet: HeaderNav Members link, optional magic-link entry, polish on `apps/web/src/pages/[locale]/members/index.astro` as needed; then the same mandatory-append chain for Step 7.
+
+Do not implement Step 6 in the same PR unless explicitly asked.
+```
+
