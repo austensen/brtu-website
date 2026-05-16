@@ -30,6 +30,9 @@ Confirm in the Netlify UI:
 | `PUBLIC_SANITY_DATASET` | Set |
 | `PUBLIC_SANITY_API_VERSION` | Optional |
 | `PUBLIC_SITE_URL` | Production origin **without** trailing slash (used for Astro `site` and event `.ics` absolute URLs) |
+| `MEMBERS_SESSION_SECRET` | Set (server-only; signs member session cookie) |
+| `MEMBERS_PASSWORD` | Set (server-only; Members page login) |
+| `MEMBERS_MAGIC_LINK_TOKEN` | Set (server-only; bootstrap URL `t` param) |
 
 ## 3. Sanity
 
@@ -60,6 +63,8 @@ Check each in a clean browser session (or incognito). Adjust paths if your slugs
 | ICS | Open `https://YOUR_PROD_HOST/calendar/en/<event-slug>.ics` — downloads/opens in a calendar app |
 | Google Calendar link | From event page, “add to calendar” (or equivalent) opens Google with plausible date/time |
 | Language switcher | Switch locale (if multiple published); href alternates sensible |
+| Members page | `/en/members` — login form; after password, members-only events/resources visible |
+| Members bootstrap | In incognito, open `https://YOUR_PROD_HOST/api/members/bootstrap?t=<TOKEN>&to=/en/events` (use real token from env, not committed); should land on `/en/events` signed in; URL bar must not retain `t` |
 
 ## 5. i18n
 

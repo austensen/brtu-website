@@ -118,6 +118,15 @@ Switching to Google Forms requires a **developer** to change the Astro template;
 - **Category** is required for filtering on the public site.
 - **Replace file workflow**: upload a new file on the same resource document and **publish**. The public URL stays the same (same slug); visitors get the new file. If a CDN caches the old file aggressively, ask a developer about cache behavior.
 
+## Members-only content
+
+Some **events** and **resource categories** can be marked **Members only** in Studio. Logged-out visitors do not see those items in lists or in page HTML; members sign in on **`/[locale]/members`** (password) or via a maintainer-issued link.
+
+- **Site settings** (per locale): **Members login help** — plain text shown on the Members page (how to get the password, who to contact, etc.).
+- **Events** / **resource categories**: toggle **Members only** when the item should be hidden from the public site until signed in. Keep the same flag on English and translated documents when possible.
+
+Maintainers configure server secrets and optional **magic-link** sign-in URLs in [`docs/ws-j-deploy-ci-env.md`](ws-j-deploy-ci-env.md#members-only-access) (bootstrap format: `/api/members/bootstrap?t=<TOKEN>` with optional `&to=/en/events`). Do not put real tokens in Studio or in git.
+
 ## Events
 
 - Enter **start** and **end** in the editor; set **timezone** so times display correctly (there is **no all-day** toggle in MVP).

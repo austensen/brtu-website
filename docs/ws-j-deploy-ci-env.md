@@ -16,6 +16,7 @@ This project follows a two-site deployment model:
    - `PUBLIC_SANITY_DATASET`
    - `PUBLIC_SANITY_API_VERSION` (optional)
    - `PUBLIC_SITE_URL` (production origin without a trailing slash; used for Astro `site` and event `.ics` links)
+   - **Members-only auth (server-only, never `PUBLIC_*`):** `MEMBERS_SESSION_SECRET`, `MEMBERS_PASSWORD`, `MEMBERS_MAGIC_LINK_TOKEN` — see [Members-only access](#members-only-access) below.
 4. Deploy from the default branch.
 
 The `apps/web` build runs `tsx scripts/generate-event-ics.ts` before `astro build`, writing files under `public/calendar/[locale]/` that are served as `/calendar/[locale]/[slug].ics`.
@@ -89,6 +90,55 @@ Publishing in Sanity updates the **content API** immediately; the **public site*
 ### Sanity webhooks
 
 If a publish→Netlify webhook was enabled during early setup, **disable or delete it** in [sanity.io/manage](https://www.sanity.io/manage) so deploys stay on-demand only.
+
+## Members-only access
+
+Members-only **events** and **resource categories** are gated on the server (signed **httpOnly** session cookie). Editors mark content in Sanity; maintainers configure secrets in Netlify and local env (see `apps/web/.env.example`).
+
+### Environment variables (server-only)
+
+Set the same names in **Netlify → Site configuration → Environment variables** and in local `apps/web/.env` (or repo-root `.env` if your dev setup loads it into the web app). **Do not** prefix these with `PUBLIC_` or import them in client code.
+
+| Variable | Purpose |
+|----------|---------|
+| `MEMBERS_SESSION_SECRET` | Signs the session cookie (e.g. `openssl rand -hex 32`). |
+| `MEMBERS_PASSWORD` | Shared password for the Members login form (`POST /api/members/login`). |
+| `MEMBERS_MAGIC_LINK_TOKEN` | Secret compared to the `t` query param on the bootstrap URL (e.g. `openssl rand -hex 24`). Reusable until rotated. |
+
+Until all three are set, login and bootstrap cannot issue a session.
+
+### Password login
+
+Visitors use **`/[locale]/members`** (e.g. `/en/members`): password form posts to `POST /api/members/login`; sign-out posts to `POST /api/members/logout`.
+
+### Magic-link bootstrap (URL)
+
+To sign someone in without the password form, send them a **one-time bookmarkable link** that hits the bootstrap route. Replace `<TOKEN>` with the value of `MEMBERS_MAGIC_LINK_TOKEN` (never commit or paste real tokens into docs or chat).
+
+**Minimal (lands on `/en/members` after login):**
+
+```
+https://YOUR_PROD_HOST/api/members/bootstrap?t=<TOKEN>
+```
+
+**With optional redirect** (`to` must be a same-origin path starting with `/`; the server strips `t` from the destination query on success):
+
+```
+https://YOUR_PROD_HOST/api/members/bootstrap?t=<TOKEN>&to=/en/events
+```
+
+Local dev (default Astro port):
+
+```
+http://localhost:4321/api/members/bootstrap?t=<TOKEN>&to=/en/events
+```
+
+**Behavior (`GET /api/members/bootstrap`):**
+
+- Valid `t`: sets the session cookie and **302** redirects to `to` if present and valid, otherwise **`/en/members`** (default locale).
+- Invalid or missing `t`: **302** to `/en/members` with **no** cookie (same as a failed login from a visitor’s perspective).
+
+Share bootstrap links only over private channels; treat `t` like a password. Rotate by generating a new `MEMBERS_MAGIC_LINK_TOKEN` in Netlify and updating bookmarks.
 
 ## CI command contract
 

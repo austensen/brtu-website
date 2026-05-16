@@ -36,6 +36,7 @@ Local development uses a single root `.env` file (never committed). Deployment/C
   - `PUBLIC_SANITY_PROJECT_ID`
   - `PUBLIC_SANITY_DATASET`
   - `PUBLIC_SANITY_API_VERSION` (optional)
+  - **Members-only (server-only, never `PUBLIC_*`):** `MEMBERS_SESSION_SECRET`, `MEMBERS_PASSWORD`, `MEMBERS_MAGIC_LINK_TOKEN` — password login at `/[locale]/members`; magic-link bootstrap at `/api/members/bootstrap?t=<TOKEN>` with optional `&to=/en/events` (see [`docs/ws-j-deploy-ci-env.md`](docs/ws-j-deploy-ci-env.md#members-only-access))
 - **Studio (`apps/studio`)**
   - `SANITY_PROJECT_ID`
   - `SANITY_DATASET`
