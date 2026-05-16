@@ -6,6 +6,7 @@ function checklistForType(schemaType: string): string[] {
   const common = [
     "Locale matches the audience for this document.",
     'Non-English documents: set "English source document" to the matching published English entry.',
+    'After publishing your changes, open Dashboard and deploy "Public website" so visitors see updates.',
   ];
   switch (schemaType) {
     case "page":
