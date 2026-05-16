@@ -36,7 +36,7 @@ info "updating $MAIN_BRANCH …"
 git checkout "$MAIN_BRANCH"
 git pull --ff-only origin "$MAIN_BRANCH"
 
-info "updating $PRODUCTION_BRANCH…"
+info "updating $PRODUCTION_BRANCH …"
 git checkout "$PRODUCTION_BRANCH"
 git pull --ff-only origin "$PRODUCTION_BRANCH"
 
@@ -48,8 +48,8 @@ if ! git merge "$MAIN_BRANCH" --ff-only; then
   echo "  (production may have extra commits, or histories diverged.)" >&2
   echo >&2
   echo "  Nothing was pushed. Resolve locally, then re-run this script:" >&2
-  echo "    git log --oneline $PRODUCTION_BRANCH..$MAIN_BRANCH   # commits on main not on production" >&2
-  echo "    git log --oneline $MAIN_BRANCH..$PRODUCTION_BRANCH   # commits on production not on main" >&2
+  echo "    git log --oneline $PRODUCTION_BRANCH .. $MAIN_BRANCH   # commits on main not on production" >&2
+  echo "    git log --oneline $MAIN_BRANCH .. $PRODUCTION_BRANCH   # commits on production not on main" >&2
   echo >&2
   echo "  Typical fixes:" >&2
   echo "    - If production should match main: git reset --hard $MAIN_BRANCH  (destructive; only if sure)" >&2
