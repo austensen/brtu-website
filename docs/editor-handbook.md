@@ -137,8 +137,10 @@ Switching to Google Forms requires a **developer** to change the Astro template;
 ## Publishing: from draft to live
 
 1. **Draft** in Studio until ready.
-2. Click **Publish** when content is correct.
-3. The public site updates on the **next successful build**. If your team configured a **Sanity webhook** to Netlify, publishing triggers a rebuild automatically (usually within a few minutes). Otherwise, someone must **trigger a deploy** manually.
+2. Click **Publish** when content is correct (you can publish several documents in a row).
+3. When you are done with a batch, open **Dashboard** in Studio and deploy **Public website**. Wait for the Netlify build to finish (usually a few minutes) before expecting visitors to see changes.
+
+Publishing alone does **not** update the public site — you must deploy after editing. A Netlify admin can also trigger a deploy from the Netlify site UI if Studio is unavailable.
 
 Details: [`docs/ws-j-deploy-ci-env.md`](ws-j-deploy-ci-env.md).
 
@@ -150,7 +152,7 @@ If you want visual runbooks, capture these and store them where your team keeps 
 2. A **Contact** page document with **contact form** fields filled.
 3. **translationOf** / English source field on a non-English document.
 4. Netlify **Forms** tab showing a test submission after launch QA.
-5. Sanity **Webhook** delivery log or Netlify **Deploy** triggered by a publish (for launch records).
+5. Studio **Dashboard** deploy widget showing a successful Netlify build (for launch records).
 
 ## Break-glass contacts (fill in locally)
 

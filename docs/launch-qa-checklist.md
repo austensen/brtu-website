@@ -34,11 +34,12 @@ Confirm in the Netlify UI:
 ## 3. Sanity
 
 - **CORS**: Allowed origins include local dev (e.g. `http://localhost:4321`) and production (and preview if used). See [`docs/ws-j-deploy-ci-env.md`](ws-j-deploy-ci-env.md).
-- **Webhook → Netlify** (recommended):
-  1. Create or use a Netlify **build hook** for the web site.
-  2. In Sanity, webhook URL = that hook; trigger on publish/unpublish for relevant types.
-  3. **Verify**: publish a small test change (or unpublish/republish). Confirm a new Netlify deploy starts.
-  4. **Record**: save a screenshot of the successful webhook delivery and/or Netlify deploy log for launch records.
+- **On-demand deploy** (no publish webhook):
+  1. Confirm there is **no** Sanity webhook pointing at the Netlify build hook (sanity.io/manage → API → Webhooks).
+  2. **Verify**: publish a small test change — confirm **no** new Netlify deploy starts within ~1 minute.
+  3. In Studio **Dashboard**, deploy **Public website** — confirm a Netlify build starts and succeeds.
+  4. Confirm the public site shows the test change after the build.
+  5. **Record**: screenshot of the successful Dashboard deploy or Netlify deploy log for launch records.
 
 ## 4. Smoke URLs
 
