@@ -1,31 +1,37 @@
 import { createClient, type SanityClient } from "@sanity/client";
+import { config as loadDotenv } from "dotenv";
+import { join } from "path";
 import { fileURLToPath } from "url";
-import { loadEnv } from "vite";
 
 const monorepoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const webRoot = fileURLToPath(new URL("../../../", import.meta.url));
 
+let dotenvLoaded = false;
+
+/** Load repo `.env` files once (local dev / scripts). Netlify injects env at build/runtime. */
+function loadEnvFiles(): void {
+  if (dotenvLoaded) return;
+  dotenvLoaded = true;
+  loadDotenv({ path: join(webRoot, ".env") });
+  loadDotenv({ path: join(monorepoRoot, ".env") });
+}
+
 export function resolveSanityEnv(): { projectId: string; dataset: string; apiVersion: string } {
-  const fileEnv = {
-    ...loadEnv("production", monorepoRoot, ""),
-    ...loadEnv("development", monorepoRoot, ""),
-    ...loadEnv("production", webRoot, ""),
-    ...loadEnv("development", webRoot, ""),
-  };
+  loadEnvFiles();
   const projectId =
     import.meta.env.PUBLIC_SANITY_PROJECT_ID ||
-    fileEnv.PUBLIC_SANITY_PROJECT_ID ||
-    fileEnv.SANITY_PROJECT_ID ||
+    process.env.PUBLIC_SANITY_PROJECT_ID ||
+    process.env.SANITY_PROJECT_ID ||
     "";
   const dataset =
     import.meta.env.PUBLIC_SANITY_DATASET ||
-    fileEnv.PUBLIC_SANITY_DATASET ||
-    fileEnv.SANITY_DATASET ||
+    process.env.PUBLIC_SANITY_DATASET ||
+    process.env.SANITY_DATASET ||
     "";
   const apiVersion =
     import.meta.env.PUBLIC_SANITY_API_VERSION ||
-    fileEnv.PUBLIC_SANITY_API_VERSION ||
-    fileEnv.SANITY_API_VERSION ||
+    process.env.PUBLIC_SANITY_API_VERSION ||
+    process.env.SANITY_API_VERSION ||
     "2024-01-01";
   return { projectId, dataset, apiVersion };
 }
