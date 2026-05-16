@@ -12,6 +12,32 @@
   margin-top: var(--space-4);
 }
 
+.preview {
+  margin: var(--space-4) 0;
+  max-width: min(100%, 28rem);
+}
+
+.previewImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md, 4px);
+}
+
+.previewPdf {
+  display: block;
+  width: 100%;
+  min-height: 16rem;
+  max-height: min(70vh, 24rem);
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 4px);
+}
+
+.previewPdfLink {
+  margin: var(--space-2) 0 0;
+  font-size: 0.9375rem;
+}
+
 .actions {
   margin-top: var(--space-6);
   display: flex;

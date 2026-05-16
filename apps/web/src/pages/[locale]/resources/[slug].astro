@@ -68,8 +68,10 @@ const langSwitcherAlternates = resource
     )
   : {};
 const pathAfterLocale = resource ? `resources/${resource.slug}` : `resources/${slug}`;
-const fileUrl = resource?.file?.asset?.url;
-const fileName = resource?.file?.asset?.originalFilename ?? "download";
+const fileAsset = resource?.file?.asset;
+const fileUrl = fileAsset?.url ?? null;
+const fileMimeType = fileAsset?.mimeType ?? null;
+const fileName = fileAsset?.originalFilename ?? "download";
 ---
 
 {
@@ -89,6 +91,7 @@ const fileName = resource?.file?.asset?.originalFilename ?? "download";
         updatedAt={resource!.updatedAt}
         summary={resource!.summary}
         fileUrl={fileUrl}
+        fileMimeType={fileMimeType}
         fileName={fileName}
         externalUrl={resource!.externalUrl}
       />

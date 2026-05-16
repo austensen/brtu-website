@@ -61,6 +61,8 @@ export const resource = defineType({
       name: "file",
       title: "Resource file",
       type: "file",
+      description:
+        "Images and PDFs are previewed on the resource detail page; other types show a download link only.",
       options: {
         accept: ".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.webp",
       },
