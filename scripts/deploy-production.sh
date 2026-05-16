@@ -32,7 +32,7 @@ trap 'if [[ "$SUCCESS" -ne 1 ]]; then echo "deploy-production: aborted (current 
 info "fetching latest from origin…"
 git fetch origin
 
-info "updating $MAIN_BRANCH…"
+info "updating $MAIN_BRANCH …"
 git checkout "$MAIN_BRANCH"
 git pull --ff-only origin "$MAIN_BRANCH"
 
