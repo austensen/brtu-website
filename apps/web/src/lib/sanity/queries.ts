@@ -1,6 +1,11 @@
 /**
  * GROQ snippets for WS-F through WS-I. Adjust projections when front-end types firm up.
  *
+ * Members area (Step 2+):
+ * - **Public** queries omit members-only events and resources in members-only categories (anonymous HTML / ICS).
+ * - **Full** queries include all published rows and expose `membersOnly` / `categoryMembersOnly` where relevant for SSR when a session exists.
+ * - Legacy names (`resourcesByLocale`, `eventBySlugAndLocale`, etc.) alias **Full** until Step 5 switches call sites explicitly.
+ *
  * publishedLocales / language switcher (WS-B):
  * - `apps/web/src/lib/i18n/locales.ts` exports `publishedLocales` (currently `["en"]`).
  * - When non-English content is published, either:
@@ -17,7 +22,8 @@ export const siteSettingsByLocale = /* groq */ `
     organizationName,
     shortDescription,
     defaultLocale,
-    socialLinks
+    socialLinks,
+    membersLoginHelp
   }
 `;
 
@@ -94,33 +100,73 @@ export const postBySlugAndLocale = /* groq */ `
   }
 `;
 
-/** Resource categories for a locale. */
+/** Resource categories for a locale (includes members-only categories). */
 export const resourceCategoriesByLocale = /* groq */ `
   *[_type == "resourceCategory" && locale == $locale] | order(title asc) {
     _id,
     title,
     "slug": slug.current,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false),
     translationOf->{ _id }
   }
 `;
 
-/** Resources for a locale. */
-export const resourcesByLocale = /* groq */ `
+/** Resource categories visible without a member session. */
+export const resourceCategoriesByLocalePublic = /* groq */ `
+  *[_type == "resourceCategory" && locale == $locale && !coalesce(membersOnly, translationOf->membersOnly, false)] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false),
+    translationOf->{ _id }
+  }
+`;
+
+/** Resources for a locale (includes resources in members-only categories). */
+export const resourcesByLocaleFull = /* groq */ `
   *[_type == "resource" && locale == $locale] | order(title asc) {
     _id,
     title,
     "slug": slug.current,
     summary,
     updatedAt,
-    category->{ title, "slug": slug.current },
+    category->{
+      title,
+      "slug": slug.current,
+      "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
+    },
+    "categoryMembersOnly": coalesce(category->membersOnly, category->translationOf->membersOnly, false),
     file,
     externalUrl,
     translationOf->{ _id, "slug": slug.current }
   }
 `;
 
-/** Single resource by slug + locale. */
-export const resourceBySlugAndLocale = /* groq */ `
+/** Resources visible without a member session. */
+export const resourcesByLocalePublic = /* groq */ `
+  *[_type == "resource" && locale == $locale && !coalesce(category->membersOnly, category->translationOf->membersOnly, false)] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    summary,
+    updatedAt,
+    category->{
+      title,
+      "slug": slug.current,
+      "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
+    },
+    "categoryMembersOnly": coalesce(category->membersOnly, category->translationOf->membersOnly, false),
+    file,
+    externalUrl,
+    translationOf->{ _id, "slug": slug.current }
+  }
+`;
+
+/** @deprecated Use `resourcesByLocaleFull` or `resourcesByLocalePublic` (Step 5). Alias of full list. */
+export const resourcesByLocale = resourcesByLocaleFull;
+
+/** Single resource by slug + locale (includes members-only categories). */
+export const resourceBySlugAndLocaleFull = /* groq */ `
   *[_type == "resource" && locale == $locale && slug.current == $slug][0]{
     _id,
     locale,
@@ -128,7 +174,12 @@ export const resourceBySlugAndLocale = /* groq */ `
     "slug": slug.current,
     summary,
     updatedAt,
-    category->{ title, "slug": slug.current },
+    category->{
+      title,
+      "slug": slug.current,
+      "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
+    },
+    "categoryMembersOnly": coalesce(category->membersOnly, category->translationOf->membersOnly, false),
     file{
       asset->{
         url,
@@ -141,8 +192,38 @@ export const resourceBySlugAndLocale = /* groq */ `
   }
 `;
 
-/** Events for a locale, soonest first. */
-export const eventsByLocale = /* groq */ `
+/** Resource detail when unauthenticated: null if category is members-only. */
+export const resourceBySlugAndLocalePublic = /* groq */ `
+  *[_type == "resource" && locale == $locale && slug.current == $slug && !coalesce(category->membersOnly, category->translationOf->membersOnly, false)][0]{
+    _id,
+    locale,
+    title,
+    "slug": slug.current,
+    summary,
+    updatedAt,
+    category->{
+      title,
+      "slug": slug.current,
+      "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
+    },
+    "categoryMembersOnly": coalesce(category->membersOnly, category->translationOf->membersOnly, false),
+    file{
+      asset->{
+        url,
+        originalFilename,
+        mimeType
+      }
+    },
+    externalUrl,
+    translationOf->{ _id, "slug": slug.current, locale }
+  }
+`;
+
+/** @deprecated Use `resourceBySlugAndLocaleFull` or `resourceBySlugAndLocalePublic`. */
+export const resourceBySlugAndLocale = resourceBySlugAndLocaleFull;
+
+/** Events for a locale, soonest first (includes members-only). */
+export const eventsByLocaleFull = /* groq */ `
   *[_type == "event" && locale == $locale] | order(startDateTime asc) {
     _id,
     title,
@@ -150,36 +231,88 @@ export const eventsByLocale = /* groq */ `
     startDateTime,
     endDateTime,
     timezone,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false),
     translationOf->{ _id, "slug": slug.current }
   }
 `;
 
-/** Upcoming events for a locale (start >= now), soonest first. */
-export const upcomingEventsByLocale = /* groq */ `
+/** Events for a locale without members-only rows. */
+export const eventsByLocalePublic = /* groq */ `
+  *[_type == "event" && locale == $locale && !coalesce(membersOnly, translationOf->membersOnly, false)] | order(startDateTime asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false),
+    translationOf->{ _id, "slug": slug.current }
+  }
+`;
+
+/** @deprecated Use `eventsByLocaleFull` or `eventsByLocalePublic`. */
+export const eventsByLocale = eventsByLocaleFull;
+
+/** Upcoming events (includes members-only). */
+export const upcomingEventsByLocaleFull = /* groq */ `
   *[_type == "event" && locale == $locale && startDateTime >= $now] | order(startDateTime asc) {
     _id,
     title,
     "slug": slug.current,
     startDateTime,
     endDateTime,
-    timezone
+    timezone,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
   }
 `;
 
-/** Past events for a locale, most recent first. */
-export const pastEventsByLocale = /* groq */ `
+/** Upcoming events visible without a member session. */
+export const upcomingEventsByLocalePublic = /* groq */ `
+  *[_type == "event" && locale == $locale && startDateTime >= $now && !coalesce(membersOnly, translationOf->membersOnly, false)] | order(startDateTime asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
+  }
+`;
+
+/** @deprecated Use `upcomingEventsByLocaleFull` or `upcomingEventsByLocalePublic`. */
+export const upcomingEventsByLocale = upcomingEventsByLocaleFull;
+
+/** Past events (includes members-only). */
+export const pastEventsByLocaleFull = /* groq */ `
   *[_type == "event" && locale == $locale && startDateTime < $now] | order(startDateTime desc) {
     _id,
     title,
     "slug": slug.current,
     startDateTime,
     endDateTime,
-    timezone
+    timezone,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
   }
 `;
 
-/** Single event by slug + locale. */
-export const eventBySlugAndLocale = /* groq */ `
+/** Past events visible without a member session. */
+export const pastEventsByLocalePublic = /* groq */ `
+  *[_type == "event" && locale == $locale && startDateTime < $now && !coalesce(membersOnly, translationOf->membersOnly, false)] | order(startDateTime desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false)
+  }
+`;
+
+/** @deprecated Use `pastEventsByLocaleFull` or `pastEventsByLocalePublic`. */
+export const pastEventsByLocale = pastEventsByLocaleFull;
+
+/** Single event by slug + locale (includes members-only events). */
+export const eventBySlugAndLocaleFull = /* groq */ `
   *[_type == "event" && locale == $locale && slug.current == $slug][0]{
     _id,
     locale,
@@ -191,6 +324,7 @@ export const eventBySlugAndLocale = /* groq */ `
     location,
     mapLink,
     joinUrl,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false),
     "promotionalFlyer": select(
       defined(promotionalFlyer.asset->_id) => promotionalFlyer{asset->{url, originalFilename, mimeType}},
       defined(translationOf->promotionalFlyer.asset->_id) => translationOf->promotionalFlyer{asset->{url, originalFilename, mimeType}}
@@ -199,6 +333,32 @@ export const eventBySlugAndLocale = /* groq */ `
     translationOf->{ _id, "slug": slug.current, locale }
   }
 `;
+
+/** Event detail when unauthenticated: null if event is members-only. */
+export const eventBySlugAndLocalePublic = /* groq */ `
+  *[_type == "event" && locale == $locale && slug.current == $slug && !coalesce(membersOnly, translationOf->membersOnly, false)][0]{
+    _id,
+    locale,
+    title,
+    "slug": slug.current,
+    startDateTime,
+    endDateTime,
+    timezone,
+    location,
+    mapLink,
+    joinUrl,
+    "membersOnly": coalesce(membersOnly, translationOf->membersOnly, false),
+    "promotionalFlyer": select(
+      defined(promotionalFlyer.asset->_id) => promotionalFlyer{asset->{url, originalFilename, mimeType}},
+      defined(translationOf->promotionalFlyer.asset->_id) => translationOf->promotionalFlyer{asset->{url, originalFilename, mimeType}}
+    ),
+    description,
+    translationOf->{ _id, "slug": slug.current, locale }
+  }
+`;
+
+/** @deprecated Use `eventBySlugAndLocaleFull` or `eventBySlugAndLocalePublic`. */
+export const eventBySlugAndLocale = eventBySlugAndLocaleFull;
 
 /** Locales that appear on any localizable document (for automating the language switcher). */
 export const distinctPublishedLocales = /* groq */ `
@@ -280,9 +440,9 @@ export const postsByLocaleSlice = /* groq */ `
   }
 `;
 
-/** All events (any locale) for ICS generation. */
+/** All events (any locale) for ICS generation — excludes members-only. */
 export const allEventsForIcs = /* groq */ `
-  *[_type == "event"]{
+  *[_type == "event" && !coalesce(membersOnly, translationOf->membersOnly, false)]{
     _id,
     locale,
     title,

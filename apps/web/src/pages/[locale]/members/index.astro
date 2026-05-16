@@ -1,0 +1,77 @@
+---
+// SSR (Astro hybrid via @astrojs/netlify). See `.cursor/plans/members_area_final_implementation_plan.md`.
+export const prerender = false;
+
+import type { SupportedLocale } from "../../../lib/i18n/locales";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
+import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import { getMemberSession } from "../../../lib/members/session";
+import { getSanityClient } from "../../../lib/sanity/client";
+import { siteSettingsByLocale } from "../../../lib/sanity/queries";
+
+const locale = Astro.params.locale as SupportedLocale;
+if (!supportedLocales.includes(locale)) {
+  return new Response(null, { status: 404 });
+}
+
+const { authenticated } = getMemberSession(Astro.request);
+
+const client = getSanityClient();
+const siteSettings = await client.fetch<{ membersLoginHelp?: string | null } | null>(siteSettingsByLocale, {
+  locale,
+});
+const membersLoginHelp = siteSettings?.membersLoginHelp?.trim() ?? "";
+
+const langSwitcherAlternates = Object.fromEntries(
+  publishedLocales.map((l) => [l, withLocalePath(l, "members")]),
+) as LangHrefMap;
+
+// Root-absolute API paths (same as `action="/api/..."`), resolved against this request’s
+// origin so POST targets never pick up a `/{locale}/` prefix from proxies or misconfigured bases.
+const membersLoginAction = new URL("/api/members/login", Astro.url).href;
+const membersLogoutAction = new URL("/api/members/logout", Astro.url).href;
+---
+
+<BaseLayout
+  title="Members"
+  locale={locale}
+  langSwitcherAlternates={langSwitcherAlternates}
+  pathAfterLocale="members"
+>
+  <h1>Members</h1>
+  {
+    authenticated ? (
+      <form method="post" action={membersLogoutAction}>
+        <input type="hidden" name="locale" value={locale} />
+        <p>
+          <button type="submit">Sign out</button>
+        </p>
+      </form>
+    ) : (
+      <>
+        {membersLoginHelp ? (
+          <p class="members-login-help">{membersLoginHelp}</p>
+        ) : null}
+        <form method="post" action={membersLoginAction}>
+          <input type="hidden" name="locale" value={locale} />
+          <p>
+            <label>
+              Password{" "}
+              <input type="password" name="password" required autocomplete="current-password" />
+            </label>
+          </p>
+          <p>
+            <button type="submit">Sign in</button>
+          </p>
+        </form>
+      </>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .members-login-help {
+    white-space: pre-wrap;
+  }
+</style>

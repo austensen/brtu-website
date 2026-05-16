@@ -41,6 +41,9 @@ export default function HeaderNav({
         <li>
           <a href={withLocalePath(locale, "events")}>Events</a>
         </li>
+        <li>
+          <a href={withLocalePath(locale, "members")}>Members</a>
+        </li>
       </ul>
       <LanguageSwitcher
         currentLocale={locale}

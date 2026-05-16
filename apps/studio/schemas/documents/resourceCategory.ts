@@ -43,5 +43,13 @@ export const resourceCategory = defineType({
       },
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "membersOnly",
+      title: "Members only",
+      type: "boolean",
+      description:
+        "When on, resources in this category are hidden from the public resources page until a member is logged in. Set the same on each translated category.",
+      initialValue: false,
+    }),
   ],
 });

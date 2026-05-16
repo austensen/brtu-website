@@ -99,5 +99,13 @@ export const event = defineType({
       type: "richText",
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "membersOnly",
+      title: "Members only",
+      type: "boolean",
+      description:
+        "When on, this event is hidden from public lists and detail until a member is logged in. Set the same on each translated event so behavior matches.",
+      initialValue: false,
+    }),
   ],
 });

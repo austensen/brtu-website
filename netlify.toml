@@ -25,6 +25,13 @@
   to = "/zh/:splat"
   status = 200
 
+# Astro server routes (members auth, etc.). Must appear before the `/*` catch-all below,
+# otherwise `/api/...` is 301'd to `/en/api/...` and the SSR handler never runs.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/ssr"
+  status = 200
+
 # WS-B locked: No-locale URLs redirect to English canonical routes.
 [[redirects]]
   from = "/*"
