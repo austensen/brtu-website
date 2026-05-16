@@ -2,7 +2,7 @@ name: Deploy Sanity Studio
 
 on:
   push:
-    branches: [main]
+    branches: [production]
     paths:
       - "apps/studio/**"
       - "packages/locales/**"
