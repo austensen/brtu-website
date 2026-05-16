@@ -10,8 +10,10 @@ import RedirectShell from "../../../components/RedirectShell.astro";
 import { fetchLangHrefAlternates, englishSourceId } from "../../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
 import { googleCalendarTemplateUrl } from "../../../lib/events/googleCalendar";
+import MembersOnlyStub from "../../../components/MembersOnlyStub.astro";
+import { getMemberSession } from "../../../lib/members/session";
 import { getSanityClient } from "../../../lib/sanity/client";
-import { allEventPathRows, eventBySlugAndLocale } from "../../../lib/sanity/queries";
+import { allEventPathRows, eventBySlugAndLocaleFull } from "../../../lib/sanity/queries";
 import { richTextToHtml } from "../../../lib/sanity/portableText";
 import { buildTranslatableSlugPaths } from "../../../lib/i18n/staticPaths";
 
@@ -38,29 +40,41 @@ const mode = Astro.props.mode as "content" | "redirect";
 const redirectTo = Astro.props.redirectTo as string | undefined;
 const showRedirect = mode === "redirect" && Boolean(redirectTo);
 
+const { authenticated } = getMemberSession(Astro.request);
 const client = getSanityClient();
-const event = showRedirect
-  ? null
-  : await client.fetch<{
-      _id: string;
-      locale: string;
-      title: string;
-      slug: string;
-      startDateTime: string;
-      endDateTime: string;
-      timezone: string;
-      location?: string | null;
-      mapLink?: string | null;
-      joinUrl?: string | null;
-      promotionalFlyer?: {
-        asset?: { url: string; originalFilename?: string | null; mimeType?: string | null } | null;
-      } | null;
-      description: unknown;
-      translationOf?: { _id: string } | null;
-    }>(eventBySlugAndLocale, { locale, slug });
 
-if (!showRedirect && !event) {
-  return new Response(null, { status: 404 });
+type EventDoc = {
+  _id: string;
+  locale: string;
+  title: string;
+  slug: string;
+  startDateTime: string;
+  endDateTime: string;
+  timezone: string;
+  membersOnly: boolean;
+  location?: string | null;
+  mapLink?: string | null;
+  joinUrl?: string | null;
+  promotionalFlyer?: {
+    asset?: { url: string; originalFilename?: string | null; mimeType?: string | null } | null;
+  } | null;
+  description: unknown;
+  translationOf?: { _id: string } | null;
+};
+
+let showMembersOnlyStub = false;
+let event: EventDoc | null = null;
+
+if (!showRedirect) {
+  const fetched = await client.fetch<EventDoc | null>(eventBySlugAndLocaleFull, { locale, slug });
+  if (!fetched) {
+    return new Response(null, { status: 404 });
+  }
+  if (fetched.membersOnly && !authenticated) {
+    showMembersOnlyStub = true;
+  } else {
+    event = fetched;
+  }
 }
 
 const bodyHtml = event ? richTextToHtml(event.description as never) : "";
@@ -98,6 +112,8 @@ const flyerFilename = flyerAsset?.originalFilename ?? null;
 {
   showRedirect ? (
     <RedirectShell to={redirectTo!} />
+  ) : showMembersOnlyStub ? (
+    <MembersOnlyStub locale={locale} pathAfterLocale={`events/${slug}`} />
   ) : (
     <BaseLayout
       title={event!.title}

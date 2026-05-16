@@ -8,8 +8,9 @@ import ResourceDirectory from "../../../components/ResourceDirectory.tsx";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import { getMemberSession } from "../../../lib/members/session";
 import { getSanityClient } from "../../../lib/sanity/client";
-import { resourcesByLocale } from "../../../lib/sanity/queries";
+import { resourcesByLocaleFull, resourcesByLocalePublic } from "../../../lib/sanity/queries";
 
 export async function getStaticPaths() {
   return publishedLocales.map((locale) => ({ params: { locale } }));
@@ -20,7 +21,9 @@ if (!supportedLocales.includes(locale)) {
   return new Response(null, { status: 404 });
 }
 
+const { authenticated } = getMemberSession(Astro.request);
 const client = getSanityClient();
+const resourcesQuery = authenticated ? resourcesByLocaleFull : resourcesByLocalePublic;
 const resources = await client.fetch<
   Array<{
     title: string;
@@ -29,7 +32,7 @@ const resources = await client.fetch<
     updatedAt: string;
     category: { title: string; slug: string } | null;
   }>
->(resourcesByLocale, { locale });
+>(resourcesQuery, { locale });
 
 const categoryMap = new Map<string, string>();
 for (const r of resources) {

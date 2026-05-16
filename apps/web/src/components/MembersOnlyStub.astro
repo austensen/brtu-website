@@ -1,0 +1,29 @@
+---
+import type { SupportedLocale } from "../lib/i18n/locales";
+import { withLocalePath } from "../lib/i18n/locales";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import type { LangHrefMap } from "../lib/i18n/langAlternates";
+
+type Props = {
+  locale: SupportedLocale;
+  pathAfterLocale: string;
+  langSwitcherAlternates?: LangHrefMap;
+};
+
+const { locale, pathAfterLocale, langSwitcherAlternates } = Astro.props;
+const membersHref = withLocalePath(locale, "members");
+---
+
+<BaseLayout
+  title="Members only"
+  locale={locale}
+  pathAfterLocale={pathAfterLocale}
+  langSwitcherAlternates={langSwitcherAlternates}
+>
+  <meta name="robots" content="noindex, nofollow" slot="head" />
+  <h1>Members only</h1>
+  <p>This content is available to union members.</p>
+  <p>
+    <a href={membersHref}>Go to the members page to sign in</a>
+  </p>
+</BaseLayout>

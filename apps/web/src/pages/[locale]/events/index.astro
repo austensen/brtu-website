@@ -1,6 +1,5 @@
 ---
 // SSR (Astro hybrid via @astrojs/netlify). See `.cursor/plans/members_area_final_implementation_plan.md`.
-// Step 4 wires session-aware fetch switching; this step only opts the route out of prerendering.
 export const prerender = false;
 
 import type { SupportedLocale } from "@brtu/locales";
@@ -8,8 +7,14 @@ import EventsIndex from "../../../components/EventsIndex.tsx";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import type { LangHrefMap } from "../../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import { getMemberSession } from "../../../lib/members/session";
 import { getSanityClient } from "../../../lib/sanity/client";
-import { pastEventsByLocale, upcomingEventsByLocale } from "../../../lib/sanity/queries";
+import {
+  pastEventsByLocaleFull,
+  pastEventsByLocalePublic,
+  upcomingEventsByLocaleFull,
+  upcomingEventsByLocalePublic,
+} from "../../../lib/sanity/queries";
 
 export async function getStaticPaths() {
   return publishedLocales.map((locale) => ({ params: { locale } }));
@@ -20,8 +25,12 @@ if (!supportedLocales.includes(locale)) {
   return new Response(null, { status: 404 });
 }
 
+const { authenticated } = getMemberSession(Astro.request);
 const now = new Date().toISOString();
 const client = getSanityClient();
+const upcomingQuery = authenticated ? upcomingEventsByLocaleFull : upcomingEventsByLocalePublic;
+const pastQuery = authenticated ? pastEventsByLocaleFull : pastEventsByLocalePublic;
+
 const upcoming = await client.fetch<
   Array<{
     title: string;
@@ -30,7 +39,7 @@ const upcoming = await client.fetch<
     endDateTime: string;
     timezone: string;
   }>
->(upcomingEventsByLocale, { locale, now });
+>(upcomingQuery, { locale, now });
 
 const past = await client.fetch<
   Array<{
@@ -40,7 +49,7 @@ const past = await client.fetch<
     endDateTime: string;
     timezone: string;
   }>
->(pastEventsByLocale, { locale, now });
+>(pastQuery, { locale, now });
 
 const langSwitcherAlternates = Object.fromEntries(
   publishedLocales.map((l) => [l, withLocalePath(l, "events")]),

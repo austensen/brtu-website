@@ -9,8 +9,10 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import RedirectShell from "../../../components/RedirectShell.astro";
 import { fetchLangHrefAlternates, englishSourceId } from "../../../lib/i18n/langAlternates";
 import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib/i18n/locales";
+import MembersOnlyStub from "../../../components/MembersOnlyStub.astro";
+import { getMemberSession } from "../../../lib/members/session";
 import { getSanityClient } from "../../../lib/sanity/client";
-import { allResourcePathRows, resourceBySlugAndLocale } from "../../../lib/sanity/queries";
+import { allResourcePathRows, resourceBySlugAndLocaleFull } from "../../../lib/sanity/queries";
 import { buildTranslatableSlugPaths } from "../../../lib/i18n/staticPaths";
 
 export async function getStaticPaths() {
@@ -36,25 +38,37 @@ const mode = Astro.props.mode as "content" | "redirect";
 const redirectTo = Astro.props.redirectTo as string | undefined;
 const showRedirect = mode === "redirect" && Boolean(redirectTo);
 
+const { authenticated } = getMemberSession(Astro.request);
 const client = getSanityClient();
-const resource = showRedirect
-  ? null
-  : await client.fetch<{
-      _id: string;
-      locale: string;
-      title: string;
-      slug: string;
-      summary: string;
-      updatedAt: string;
-      category: { title: string; slug: string } | null;
-      file?: { asset?: { url?: string; originalFilename?: string; mimeType?: string } };
-      externalUrl?: string | null;
-      body?: unknown;
-      translationOf?: { _id: string } | null;
-    }>(resourceBySlugAndLocale, { locale, slug });
 
-if (!showRedirect && !resource) {
-  return new Response(null, { status: 404 });
+type ResourceDoc = {
+  _id: string;
+  locale: string;
+  title: string;
+  slug: string;
+  summary: string;
+  updatedAt: string;
+  categoryMembersOnly: boolean;
+  category: { title: string; slug: string } | null;
+  file?: { asset?: { url?: string; originalFilename?: string; mimeType?: string } };
+  externalUrl?: string | null;
+  body?: unknown;
+  translationOf?: { _id: string } | null;
+};
+
+let showMembersOnlyStub = false;
+let resource: ResourceDoc | null = null;
+
+if (!showRedirect) {
+  const fetched = await client.fetch<ResourceDoc | null>(resourceBySlugAndLocaleFull, { locale, slug });
+  if (!fetched) {
+    return new Response(null, { status: 404 });
+  }
+  if (fetched.categoryMembersOnly && !authenticated) {
+    showMembersOnlyStub = true;
+  } else {
+    resource = fetched;
+  }
 }
 
 const enId = resource ? englishSourceId(resource) : "";
@@ -77,6 +91,8 @@ const fileName = fileAsset?.originalFilename ?? "download";
 {
   showRedirect ? (
     <RedirectShell to={redirectTo!} />
+  ) : showMembersOnlyStub ? (
+    <MembersOnlyStub locale={locale} pathAfterLocale={`resources/${slug}`} />
   ) : (
     <BaseLayout
       title={resource!.title}
