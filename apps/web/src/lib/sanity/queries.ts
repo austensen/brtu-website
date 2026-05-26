@@ -23,7 +23,8 @@ export const siteSettingsByLocale = /* groq */ `
     shortDescription,
     defaultLocale,
     socialLinks,
-    membersLoginHelp
+    membersLoginHelp,
+    airTableFormUrl
   }
 `;
 

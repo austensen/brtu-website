@@ -9,6 +9,7 @@ import { publishedLocales, supportedLocales, withLocalePath } from "../../../lib
 import { getMemberSession } from "../../../lib/members/session";
 import { getSanityClient } from "../../../lib/sanity/client";
 import { siteSettingsByLocale } from "../../../lib/sanity/queries";
+import AirTableFormEmbed from "../../../components/AirTableFormEmbed";
 
 const locale = Astro.params.locale as SupportedLocale;
 if (!supportedLocales.includes(locale)) {
@@ -18,10 +19,14 @@ if (!supportedLocales.includes(locale)) {
 const { authenticated } = getMemberSession(Astro.request);
 
 const client = getSanityClient();
-const siteSettings = await client.fetch<{ membersLoginHelp?: string | null } | null>(siteSettingsByLocale, {
+const siteSettings = await client.fetch<{
+  membersLoginHelp?: string | null;
+  airTableFormUrl?: string | null;
+} | null>(siteSettingsByLocale, {
   locale,
 });
 const membersLoginHelp = siteSettings?.membersLoginHelp?.trim() ?? "";
+const airTableFormUrl = siteSettings?.airTableFormUrl ?? "";
 
 const langSwitcherAlternates = Object.fromEntries(
   publishedLocales.map((l) => [l, withLocalePath(l, "members")]),
@@ -42,17 +47,18 @@ const membersLogoutAction = new URL("/api/members/logout", Astro.url).href;
   <h1>Members</h1>
   {
     authenticated ? (
-      <form method="post" action={membersLogoutAction}>
-        <input type="hidden" name="locale" value={locale} />
-        <p>
-          <button type="submit">Sign out</button>
-        </p>
-      </form>
+      <>
+        <form method="post" action={membersLogoutAction}>
+          <input type="hidden" name="locale" value={locale} />
+          <p>
+            <button type="submit">Sign out</button>
+          </p>
+        </form>
+        {airTableFormUrl && <AirTableFormEmbed formUrl={airTableFormUrl} />}
+      </>
     ) : (
       <>
-        {membersLoginHelp ? (
-          <p class="members-login-help">{membersLoginHelp}</p>
-        ) : null}
+        {membersLoginHelp ? <p class="members-login-help">{membersLoginHelp}</p> : null}
         <form method="post" action={membersLoginAction}>
           <input type="hidden" name="locale" value={locale} />
           <p>
