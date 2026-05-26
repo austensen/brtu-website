@@ -135,8 +135,8 @@ http://localhost:4321/api/members/bootstrap?t=<TOKEN>&to=/en/events
 
 **Behavior (`GET /api/members/bootstrap`):**
 
-- Valid `t`: sets the session cookie and **302** redirects to `to` if present and valid, otherwise **`/en/members`** (default locale).
-- Invalid or missing `t`: **302** to `/en/members` with **no** cookie (same as a failed login from a visitor’s perspective).
+- Valid `t`: sets the session cookie and sends the browser to `to` if present and valid, otherwise **`/en/members`** (default locale), without retaining bootstrap query params.
+- Invalid or missing `t`: sends the browser to `/en/members` with **no** cookie (same as a failed login from a visitor’s perspective).
 
 Share bootstrap links only over private channels; treat `t` like a password. Rotate by generating a new `MEMBERS_MAGIC_LINK_TOKEN` in Netlify and updating bookmarks.
 
