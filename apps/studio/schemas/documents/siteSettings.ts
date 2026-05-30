@@ -80,7 +80,7 @@ export const siteSettings = defineType({
         "Shown on the public Members login page for this locale (e.g. how to get the password or who to contact). Plain text only.",
     }),
     defineField({
-      name: "airTableFormUrl",
+      name: "airtableFormUrl",
       title: "AirTable form URL",
       type: "url",
       description: "The URL of the AirTable form to embed on the Members page.",

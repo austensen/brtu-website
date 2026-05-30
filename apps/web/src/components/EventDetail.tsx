@@ -1,5 +1,6 @@
 import type { SupportedLocale } from "@brtu/locales";
 
+import AirTableFormEmbed from "./AirTableFormEmbed";
 import styles from "./EventDetail.module.css";
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
   bodyHtml: string;
   gcal: string;
   icsHref: string;
+  airtableFormUrl: string | null;
 };
 
 function calendarDateKeyInTz(d: Date, timeZone: string): string {
@@ -61,6 +63,7 @@ export default function EventDetail({
   bodyHtml,
   gcal,
   icsHref,
+  airtableFormUrl,
 }: Props) {
   const mime = flyerMimeType ?? "";
   const isImage = Boolean(flyerUrl && mime.startsWith("image/"));
@@ -129,6 +132,7 @@ export default function EventDetail({
         </p>
       ) : null}
       <div className="prose" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      {airtableFormUrl && <AirTableFormEmbed formUrl={airtableFormUrl} />}
     </article>
   );
 }

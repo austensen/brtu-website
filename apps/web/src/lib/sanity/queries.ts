@@ -24,7 +24,7 @@ export const siteSettingsByLocale = /* groq */ `
     defaultLocale,
     socialLinks,
     membersLoginHelp,
-    airTableFormUrl
+    airtableFormUrl
   }
 `;
 
@@ -331,7 +331,8 @@ export const eventBySlugAndLocaleFull = /* groq */ `
       defined(translationOf->promotionalFlyer.asset->_id) => translationOf->promotionalFlyer{asset->{url, originalFilename, mimeType}}
     ),
     description,
-    translationOf->{ _id, "slug": slug.current, locale }
+    translationOf->{ _id, "slug": slug.current, locale },
+    airtableFormUrl
   }
 `;
 

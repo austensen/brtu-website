@@ -4,7 +4,7 @@
 export const prerender = false;
 
 import type { SupportedLocale } from "@brtu/locales";
-import EventDetail from "../../../components/EventDetail.tsx";
+import EventDetail from "../../../components/EventDetail";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import RedirectShell from "../../../components/RedirectShell.astro";
 import { fetchLangHrefAlternates, englishSourceId } from "../../../lib/i18n/langAlternates";
@@ -20,11 +20,8 @@ import { buildTranslatableSlugPaths } from "../../../lib/i18n/staticPaths";
 export async function getStaticPaths() {
   const client = getSanityClient();
   const rows = await client.fetch(allEventPathRows);
-  const paths = buildTranslatableSlugPaths(
-    rows,
-    publishedLocales,
-    "en",
-    (loc, s) => withLocalePath(loc, `events/${s}`),
+  const paths = buildTranslatableSlugPaths(rows, publishedLocales, "en", (loc, s) =>
+    withLocalePath(loc, `events/${s}`),
   );
   return paths.map((p) => ({ params: p.params, props: p.props }));
 }
@@ -60,6 +57,7 @@ type EventDoc = {
   } | null;
   description: unknown;
   translationOf?: { _id: string } | null;
+  airtableFormUrl?: string | null;
 };
 
 let showMembersOnlyStub = false;
@@ -103,6 +101,10 @@ const gcal = event
 
 const icsHref = `/calendar/${locale}/${slug}.ics`;
 
+const airtableFormUrlPrefilled = event?.airtableFormUrl
+  ? `${event.airtableFormUrl}?prefill_Event=${event?.slug}&hide_Event=true`
+  : null;
+
 const flyerAsset = event?.promotionalFlyer?.asset;
 const flyerUrl = flyerAsset?.url ?? null;
 const flyerMimeType = flyerAsset?.mimeType ?? null;
@@ -136,6 +138,7 @@ const flyerFilename = flyerAsset?.originalFilename ?? null;
         bodyHtml={bodyHtml}
         gcal={gcal}
         icsHref={icsHref}
+        airtableFormUrl={airtableFormUrlPrefilled}
       />
     </BaseLayout>
   )

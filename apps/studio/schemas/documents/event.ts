@@ -107,5 +107,12 @@ export const event = defineType({
         "When on, this event is hidden from public lists and detail until a member is logged in. Set the same on each translated event so behavior matches.",
       initialValue: false,
     }),
+    defineField({
+      name: "airtableFormUrl",
+      title: "AirTable form URL",
+      type: "url",
+      description:
+        "The URL of the AirTable form to embed on the event detail page. The following search params are added for prefilled values: `?prefill_Event=<event_slug>&hide_Event=true`.",
+    }),
   ],
 });

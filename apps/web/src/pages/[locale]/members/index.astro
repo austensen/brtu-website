@@ -21,12 +21,12 @@ const { authenticated } = getMemberSession(Astro.request);
 const client = getSanityClient();
 const siteSettings = await client.fetch<{
   membersLoginHelp?: string | null;
-  airTableFormUrl?: string | null;
+  airtableFormUrl?: string | null;
 } | null>(siteSettingsByLocale, {
   locale,
 });
 const membersLoginHelp = siteSettings?.membersLoginHelp?.trim() ?? "";
-const airTableFormUrl = siteSettings?.airTableFormUrl ?? "";
+const airtableFormUrl = siteSettings?.airtableFormUrl ?? "";
 
 const langSwitcherAlternates = Object.fromEntries(
   publishedLocales.map((l) => [l, withLocalePath(l, "members")]),
@@ -54,7 +54,7 @@ const membersLogoutAction = new URL("/api/members/logout", Astro.url).href;
             <button type="submit">Sign out</button>
           </p>
         </form>
-        {airTableFormUrl && <AirTableFormEmbed formUrl={airTableFormUrl} />}
+        {airtableFormUrl && <AirTableFormEmbed formUrl={airtableFormUrl} />}
       </>
     ) : (
       <>
