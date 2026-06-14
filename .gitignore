@@ -15,3 +15,6 @@ apps/**/node_modules/
 
 # Sanity
 apps/studio/.sanity/
+
+# Local maintainer artifacts (QR codes may encode secrets)
+.local/

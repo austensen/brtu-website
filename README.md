@@ -52,6 +52,7 @@ Local development uses a single root `.env` file (never committed). Deployment/C
 - `npm run typecheck`: typecheck both apps
 - `npm run format`: format repo
 - `npm run format:check`: verify formatting
+- `npm run qr -- --url "http://localhost:4321/api/members/bootstrap?t=TOKEN&to=/en/events"`: local-only PNG QR (output under `.local/qr/`)
 
 ## Deployment notes
 

@@ -21,7 +21,8 @@
     "lint": "eslint .",
     "typecheck": "npm -w apps/web run typecheck && npm -w apps/studio run typecheck",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "qr": "npm -w apps/web run qr --"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

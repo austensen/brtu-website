@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "env NETLIFY_DEV=1 astro dev",
     "build": "tsx scripts/generate-event-ics.ts && astro build",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "qr": "tsx scripts/generate-qr.ts"
   },
   "dependencies": {
     "@astrojs/netlify": "^6.6.5",
